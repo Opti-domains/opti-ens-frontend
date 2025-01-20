@@ -11,17 +11,21 @@ import {
 import { Button } from "@/components/ui/button"
 
 /**
- * Sample data. In a real app, you might fetch this from a database or API.
+ * Type definition for domain items
+ * Adjust fields as needed (e.g., string, Date, etc.)
  */
-const domains = [
-  { name: "example.com",       expiration: "2024-05-15", action: "Claim" },
-  { name: "mywebsite.com",     expiration: "2025-02-28", action: "Manage" },
-  { name: "coolapp.io",        expiration: "2024-09-01", action: "Claim" },
-  { name: "bestshop.com",      expiration: "2025-11-30", action: "Manage" },
-  { name: "techblog.net",      expiration: "2024-07-22", action: "Claim" },
-]
+interface Domain {
+  name: string
+  expiration?: string
+  action?: string
+}
 
-export function DomainList() {
+/**
+ * DomainList component
+ * - Takes in an array of Domain objects
+ * - Shows "No domain" if the array is empty
+ */
+export function DomainList({ domains }: { domains: Domain[] }) {
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
       <h2 className="mb-4 text-xl font-bold">Domain List</h2>
@@ -33,20 +37,31 @@ export function DomainList() {
             <TableHead className="text-right">ACTION</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
-          {domains.map((d) => (
-            <TableRow key={d.name}>
-              <TableCell>{d.name}</TableCell>
-              <TableCell>{d.expiration}</TableCell>
-              <TableCell className="text-right">
-                {d.action === "Claim" ? (
-                  <Button variant="link">{d.action}</Button>
-                ) : (
-                  <Button variant="secondary">{d.action}</Button>
-                )}
+          {domains.length === 0 ? (
+            // Show a single row indicating no domain
+            <TableRow>
+              <TableCell colSpan={3} className="text-center">
+                No domain
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            // Map through the domains if we do have data
+            domains.map((d) => (
+              <TableRow key={d.name}>
+                <TableCell>{d.name}</TableCell>
+                <TableCell>{d.expiration || "--"}</TableCell>
+                <TableCell className="text-right">
+                  {d.action === "Claim" ? (
+                    <Button variant="default">{d.action}</Button>
+                  ) : (
+                    <Button variant="secondary">{d.action || "Manage"}</Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>
