@@ -32,9 +32,9 @@ export function DomainList({ domains }: { domains: Domain[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>DOMAIN NAME</TableHead>
-            <TableHead>EXPIRATION DATE</TableHead>
-            <TableHead className="text-right">ACTION</TableHead>
+            <TableHead>Domain Name</TableHead>
+            <TableHead>Expiration Date</TableHead>
+            <TableHead className="text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
 

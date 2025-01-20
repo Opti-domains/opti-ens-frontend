@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
+import Image from "next/image";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -13,8 +14,10 @@ export function Header() {
         {/* Left side: brand or logo */}
         <div className="flex items-center space-x-2">
           {/* Example logo placeholder */}
-          <div className="h-8 w-8 rounded-full bg-gray-200" />
-          <span className="text-lg font-semibold">Singular Domain</span>
+          <div className="h-8 w-8 rounded-full bg-gray-200">
+            <Image src="/icons/logo.svg" alt="Singular domains logo" width="40" height="40" />
+          </div>
+          <span className="text-lg font-semibold text-red-600">Singular Domain</span>
         </div>
 
         {/* Right side: nav & hamburger toggle */}
@@ -43,25 +46,25 @@ export function Header() {
           <nav className="hidden items-center space-x-6 md:flex">
             <Link
               href="/"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="text-sm font-bold text-gray-600 hover:text-red-600"
             >
               Home
             </Link>
             <Link
               href="/about"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="text-sm font-bold text-gray-600 hover:text-red-600"
             >
               About
             </Link>
             <Link
               href="/contact"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="text-sm font-bold text-gray-600 hover:text-red-600"
             >
               Contact
             </Link>
 
             {/* RainbowKit Connect Button */}
-            <ConnectButton />
+            <ConnectButton showBalance={false} label="Connect" />
           </nav>
         </div>
       </div>
@@ -71,28 +74,28 @@ export function Header() {
         <nav className="flex flex-col space-y-2 border-t p-4 md:hidden">
           <Link
             href="/"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            className="text-sm font-medium text-gray-600"
             onClick={() => setIsOpen(false)}
           >
             Home
           </Link>
           <Link
             href="/about"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            className="text-sm font-medium text-gray-600"
             onClick={() => setIsOpen(false)}
           >
             About
           </Link>
           <Link
             href="/contact"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            className="text-sm font-medium text-gray-600"
             onClick={() => setIsOpen(false)}
           >
             Contact
           </Link>
 
           {/* RainbowKit Connect Button */}
-          <ConnectButton />
+          <ConnectButton showBalance={false} label="Connect" />
         </nav>
       )}
     </header>

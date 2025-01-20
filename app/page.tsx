@@ -6,6 +6,7 @@ import { GraphQLClient, gql } from "graphql-request"
 
 import { DomainList } from "@/components/domain-list"
 import {toast} from "sonner";
+import {ConnectButton} from "@rainbow-me/rainbowkit";
 
 // The Graph endpoint for ENS
 const ENDPOINT = "https://api.thegraph.com/subgraphs/name/ensdomains/ens"
@@ -40,8 +41,8 @@ export default function HomePage() {
       try {
         const client = new GraphQLClient(ENDPOINT)
         const data: any = await client.request(GET_ENS_DOMAINS, {
-          id: address?.toLowerCase(),
-          // id: '0xf01Dd015Bc442d872275A79b9caE84A6ff9B2A27'.toLowerCase(),
+          // id: address?.toLowerCase(),
+          id: '0xf01Dd015Bc442d872275A79b9caE84A6ff9B2A27'.toLowerCase(),
         })
         console.log(data)
 
@@ -54,7 +55,6 @@ export default function HomePage() {
           if (d?.registration?.expiryDate) {
             const expirySec = parseInt(d.registration.expiryDate, 10) * 1000
             expiration = new Date(expirySec).toISOString().split("T")[0]
-            // e.g., '2024-09-10'
           }
 
           return {
@@ -65,7 +65,6 @@ export default function HomePage() {
         })
 
         setEnsDomains(mapped)
-        toast.success("Successfully fetched ENS domains.")
       } catch (err) {
         console.error("Error fetching ENS:", err)
         toast.error("Failed to fetch ENS domains.")
@@ -83,17 +82,34 @@ export default function HomePage() {
 
   if (!isConnected) {
     return (
-      <main className="p-4">
-        <h1 className="text-xl font-bold">Home</h1>
-        <p>Please connect your wallet to view your ENS domains.</p>
+      <main className="flex flex-col items-center justify-center px-4 py-16 text-center">
+        <h1 className="mb-4 text-2xl font-bold">Welcome to Singular Domain</h1>
+        <p className="max-w-xl text-gray-600">
+          Singular Domain is a 1:1 claim project based on your ENS domains.
+          If you own <strong>.eth</strong> names, you can claim a corresponding
+          “Singular Domain” in our ecosystem. Claiming preserves your brand,
+          identity, and uniqueness in the web3 space.
+        </p>
+
+        <p className="mt-4 text-gray-600">
+          Connect your wallet to verify your ENS domains, then mint your 1:1
+          Singular Domains absolutely free!
+        </p>
+
+        <div className="mt-8">
+          <ConnectButton showBalance={false} label="Connect"/>
+        </div>
       </main>
     )
   }
 
   return (
-    <main className="p-4">
+    <main className="px-4 py-8">
       {loading && <p className="mt-2">Loading ENS data...</p>}
-      <DomainList domains={ensDomains} />
+      <h2 className="mb-6 text-xl font-semibold">
+        Your Singular Domains
+      </h2>
+      <DomainList domains={ensDomains}/>
     </main>
   )
 }

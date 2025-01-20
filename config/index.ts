@@ -14,12 +14,12 @@ export const config = getDefaultConfig({
   appName: 'Singular Domains',
   projectId: 'b56e18d47c72ab683b10814fe9495694',
   chains: [
-    mainnet,
-    polygon,
+    // mainnet,
+    // polygon,
     optimism,
-    arbitrum,
-    base,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
+    // arbitrum,
+    // base,
+    // ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
   ],
   ssr: true,
 });
