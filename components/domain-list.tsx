@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import {toast} from "sonner";
 
 /**
  * Type definition for domain items
@@ -26,6 +27,21 @@ interface Domain {
  * - Shows "No domain" if the array is empty
  */
 export function DomainList({ domains }: { domains: Domain[] }) {
+  const handleClaim = (domain: Domain) => {
+    if (!domain.expiration || domain.expiration === "--") {
+      toast.error("Claim domain failed", {
+        description: "Domain " + domain.name + " has no expiration date",
+      })
+      return
+    }
+
+    toast.success("Claim domain success", {
+      description: "You was claimed domain " + domain.name,
+    })
+  }
+  const handleManage = (domain: Domain) => {
+    toast.success("Managing domain " + domain.name)
+  }
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
       <h2 className="mb-4 text-xl font-bold">Domain List</h2>
@@ -54,9 +70,9 @@ export function DomainList({ domains }: { domains: Domain[] }) {
                 <TableCell>{d.expiration || "--"}</TableCell>
                 <TableCell className="text-right">
                   {d.action === "Claim" ? (
-                    <Button variant="default">{d.action}</Button>
+                    <Button variant="default" onClick={() => handleClaim(d)}>{d.action}</Button>
                   ) : (
-                    <Button variant="secondary">{d.action || "Manage"}</Button>
+                    <Button variant="secondary" onClick={() => handleManage(d)}>{d.action || "Manage"}</Button>
                   )}
                 </TableCell>
               </TableRow>
