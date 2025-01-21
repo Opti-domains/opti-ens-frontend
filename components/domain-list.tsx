@@ -8,10 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import {Button} from "@/components/ui/button"
 import {toast} from "sonner";
 import {useSignDomain} from "@/hooks/useSignDomain";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import {useWaitForTransactionReceipt, useWriteContract, type BaseError} from 'wagmi';
+import {registryAbi} from "@/lib/abi/registry";
+import {padHex, toHex} from "viem";
+
+
+const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || '0x';
+const domainAddress = process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || '0x';
 
 /**
  * Type definition for domain items
@@ -29,8 +36,16 @@ interface Domain {
  * - Takes in an array of Domain objects
  * - Shows "No domain" if the array is empty
  */
-export function DomainList({ domains }: { domains: Domain[] }) {
-  const { signDomain, data, error, isMutating } = useSignDomain();
+export function DomainList({domains}: { domains: Domain[] }) {
+  const {signDomain, data, error: signErr, isMutating} = useSignDomain();
+  const {data: hash, error, writeContract} = useWriteContract();
+  const [label, setLabel] = useState<string>("");
+  const [owner, setOwner] = useState<string>("");
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    })
+
   const handleClaim = async (domain: Domain) => {
     try {
       if (!domain.expiration || domain.expiration === "--") {
@@ -39,7 +54,10 @@ export function DomainList({ domains }: { domains: Domain[] }) {
         })
         return
       }
-      await signDomain({domain: domain.name, expiration: Date.parse(domain.expiration), owner: domain.owner})
+      const name = domain.name.split(".")[0]
+      setLabel(name);
+      setOwner(domain.owner);
+      await signDomain({domain: name, expiration: Date.parse(domain.expiration), owner: domain.owner})
     } catch (err) {
       console.error("Error claiming domain:", err);
     }
@@ -49,18 +67,50 @@ export function DomainList({ domains }: { domains: Domain[] }) {
   }
 
   useEffect(() => {
-    if (isMutating) {
-      toast.loading("Claiming domain...")
-    } else if (error) {
-      toast.dismiss();
-      toast.error("Claim domain failed", {
-        description: error.message,
-      })
-    } else if (data) {
-      toast.dismiss();
-      toast.success("Claimed domain signature: " + data.signature)
+    try {
+      if (isMutating) {
+        toast.loading("Claiming domain...")
+      } else if (signErr) {
+        toast.dismiss();
+        toast.error("Claim domain failed", {
+          description: signErr.message,
+        })
+      } else if (data) {
+        console.log(data);
+        console.log("domainAddress", domainAddress);
+        console.log("label", label);
+        console.log("owner", owner);
+        console.log("registryAddress", registryAddress);
+        const hexValue = toHex(data.nonce);
+        const byte32Value = padHex(hexValue, {size: 32});
+        writeContract({
+          address: registryAddress as `0x${string}`,
+          abi: registryAbi,
+          functionName: "register",
+          args: [domainAddress as `0x${string}`, label, owner, data.deadline, byte32Value, data.signature],
+        });
+      }
+    } catch (err) {
+      console.error("Error claiming domain:", err);
     }
-  }, [isMutating, error, data]);
+  }, [isMutating, signErr, data]);
+
+  useEffect(() => {
+    if (error) {
+      toast.dismiss();
+      toast.error("Claimed domain failed", {
+        description: (error as BaseError).shortMessage || error.message,
+      });
+    }
+    if (isConfirming) {
+      toast.dismiss();
+      toast.loading("Confirming domain claim: " + hash);
+    }
+    if (isConfirmed) {
+      toast.dismiss();
+      toast.success("Claimed domain success with hash: " + hash);
+    }
+  }, [error, isConfirming, isConfirmed]);
 
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
