@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import {toast} from "sonner";
+import {useSignDomain} from "@/hooks/useSignDomain";
+import {useEffect} from "react";
 
 /**
  * Type definition for domain items
@@ -17,6 +19,7 @@ import {toast} from "sonner";
  */
 interface Domain {
   name: string
+  owner: `0x${string}`
   expiration?: string
   action?: string
 }
@@ -27,30 +30,43 @@ interface Domain {
  * - Shows "No domain" if the array is empty
  */
 export function DomainList({ domains }: { domains: Domain[] }) {
-  const handleClaim = (domain: Domain) => {
+  const { signDomain, data, error, isMutating } = useSignDomain();
+  const handleClaim = async (domain: Domain) => {
     if (!domain.expiration || domain.expiration === "--") {
       toast.error("Claim domain failed", {
         description: "Domain " + domain.name + " has no expiration date",
       })
       return
     }
-
-    toast.success("Claim domain success", {
-      description: "You was claimed domain " + domain.name,
-    })
+    await signDomain({ domain: domain.name, expiration: Date.parse(domain.expiration), owner: domain.owner })
   }
   const handleManage = (domain: Domain) => {
     toast.success("Managing domain " + domain.name)
   }
+
+  useEffect(() => {
+    if (isMutating) {
+      toast.loading("Claiming domain...")
+    } else if (error) {
+      toast.dismiss();
+      toast.error("Claim domain failed", {
+        description: error.message,
+      })
+    } else if (data) {
+      toast.dismiss();
+      toast.success("Claimed domain signature: " + data.signature)
+    }
+  }, [isMutating, error, data]);
+
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
       <h2 className="mb-4 text-xl font-bold">Domain List</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Domain Name</TableHead>
-            <TableHead>Expiration Date</TableHead>
-            <TableHead className="text-right">Action</TableHead>
+            <TableHead className="font-bold">Domain Name</TableHead>
+            <TableHead className="font-bold">Expiration Date</TableHead>
+            <TableHead className="font-bold text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -58,7 +74,7 @@ export function DomainList({ domains }: { domains: Domain[] }) {
           {domains.length === 0 ? (
             // Show a single row indicating no domain
             <TableRow>
-              <TableCell colSpan={3} className="text-center">
+              <TableCell colSpan={3} className="text-center text-2xl">
                 No domain
               </TableCell>
             </TableRow>
