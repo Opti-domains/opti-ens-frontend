@@ -22,7 +22,7 @@ export default function HomePage() {
     async function fetchData() {
       setLoading(true)
       try {
-        // const data = await fetch(`/api/domains?owner=${address}`)
+        // const res = await fetch(`/api/ens?owner=${address?.toLowerCase()}`)
         const res = await fetch(`/api/ens?owner=${'0xf01Dd015Bc442d872275A79b9caE84A6ff9B2A27'.toLowerCase()}`)
         const data = await res.json()
 

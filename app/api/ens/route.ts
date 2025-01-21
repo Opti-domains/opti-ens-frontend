@@ -5,7 +5,7 @@ const SUBGRAPH_URL = process.env.SECRET_SUBGRAPH_URL
 
 const query = gql`
   query GetDomainsByOwner($owner: String!) {
-    domains(where: { owner: $owner }) {
+    domains(where: { owner: $owner, parent_: {name: "eth"}}) {
       id
       name
       expiryDate
@@ -26,6 +26,8 @@ async function fetchDomainsByOwner(ownerAddress: string) {
     const variables = {
       owner: ownerAddress.toLowerCase(), // Convert to lowercase for consistency
     };
+
+    console.log('Fetching domains for owner:', ownerAddress);
 
     return await request(SUBGRAPH_URL!, query, variables);
   } catch (error) {
