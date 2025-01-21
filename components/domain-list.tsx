@@ -32,13 +32,17 @@ interface Domain {
 export function DomainList({ domains }: { domains: Domain[] }) {
   const { signDomain, data, error, isMutating } = useSignDomain();
   const handleClaim = async (domain: Domain) => {
-    if (!domain.expiration || domain.expiration === "--") {
-      toast.error("Claim domain failed", {
-        description: "Domain " + domain.name + " has no expiration date",
-      })
-      return
+    try {
+      if (!domain.expiration || domain.expiration === "--") {
+        toast.error("Claim domain failed", {
+          description: "Domain " + domain.name + " has no expiration date",
+        })
+        return
+      }
+      await signDomain({domain: domain.name, expiration: Date.parse(domain.expiration), owner: domain.owner})
+    } catch (err) {
+      console.error("Error claiming domain:", err);
     }
-    await signDomain({ domain: domain.name, expiration: Date.parse(domain.expiration), owner: domain.owner })
   }
   const handleManage = (domain: Domain) => {
     toast.success("Managing domain " + domain.name)

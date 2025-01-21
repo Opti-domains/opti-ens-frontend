@@ -10,7 +10,7 @@ import {ConnectButton} from "@rainbow-me/rainbowkit";
 export default function HomePage() {
   const { address, isConnected } = useAccount()
   const [ensDomains, setEnsDomains] = useState<
-    { name: string; expiration?: string; action?: string }[]
+    { name: string; owner: `0x${string}`, expiration?: string; action?: string }[]
   >([])
   const [loading, setLoading] = useState(false)
 
@@ -39,6 +39,7 @@ export default function HomePage() {
 
           return {
             name: d.name,
+            owner: address,
             expiration,
             action: "Claim",
           }
