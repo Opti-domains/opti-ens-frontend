@@ -89,7 +89,7 @@ export function DomainList({domains}: { domains: Domain[] }) {
     } catch (err) {
       console.error("Error claiming domain:", err);
     }
-  }, [isMutating, signErr, data]);
+  }, [isMutating, signErr, data, writeContract, label, owner]);
 
   useEffect(() => {
     if (error) {
@@ -106,11 +106,11 @@ export function DomainList({domains}: { domains: Domain[] }) {
       toast.dismiss();
       toast.success("Claimed domain success with hash: " + hash);
     }
-  }, [error, isConfirming, isConfirmed]);
+  }, [error, isConfirming, isConfirmed, hash]);
 
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
-      <h2 className="mb-4 text-xl font-bold">Domain List</h2>
+      <h2 className="mb-4 text-xl font-bold">Domain Lists</h2>
       <Table>
         <TableHeader>
           <TableRow>

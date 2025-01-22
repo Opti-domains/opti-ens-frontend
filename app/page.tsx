@@ -33,7 +33,7 @@ export default function HomePage() {
         const fetchedDomains = data.domains || []
 
         // Convert the data to the shape needed by DomainList
-        const mapped = fetchedDomains.map((d: any) => {
+        const mapped = fetchedDomains.map((d: { expiryDate: string; name: string; }) => {
           // The subgraph's expiryDate is a Unix timestamp in *seconds*
           let expiration = "--"
           if (d.expiryDate) {
@@ -123,9 +123,6 @@ export default function HomePage() {
         </div>
       ) : (
           <div>
-            <h2 className="mb-6 text-xl font-semibold">
-              Your Singular Domains
-            </h2>
             <DomainList domains={ensDomains}/>
           </div>
         )}
