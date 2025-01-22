@@ -1,9 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a singular domain that will be used to user claim opt.id domain
 
 ## Getting Started
 
 First, run the development server:
 
+- Config environment variables in `.env.local` file by copying `.env.example` file
+```bash
+cp .env.example .env.local
+```
+
+- Install dependencies
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+- Run the development server
 ```bash
 npm run dev
 # or

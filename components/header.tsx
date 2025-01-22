@@ -46,19 +46,19 @@ export function Header() {
           <nav className="hidden items-center space-x-6 md:flex">
             <Link
               href="/"
-              className="text-sm font-bold text-gray-600 hover:text-blue-500 transition duration-300"
+              className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
             >
               Home
             </Link>
             <Link
               href="/about"
-              className="text-sm font-bold text-gray-600 hover:text-blue-500 transition duration-300"
+              className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
             >
               About
             </Link>
             <Link
               href="/contact"
-              className="text-sm font-bold text-gray-600 hover:text-blue-500 transition duration-300"
+              className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
             >
               Contact
             </Link>
