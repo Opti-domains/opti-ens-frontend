@@ -77,17 +77,13 @@ export function DomainList({domains}: { domains: Domain[] }) {
         })
       } else if (data) {
         console.log(data);
-        console.log("domainAddress", domainAddress);
-        console.log("label", label);
-        console.log("owner", owner);
-        console.log("registryAddress", registryAddress);
-        const hexValue = toHex(data.nonce);
+        const hexValue = toHex(Number(data.nonce));
         const byte32Value = padHex(hexValue, {size: 32});
         writeContract({
           address: registryAddress as `0x${string}`,
           abi: registryAbi,
           functionName: "register",
-          args: [domainAddress as `0x${string}`, label, owner, data.deadline, byte32Value, data.signature],
+          args: [domainAddress as `0x${string}`, label, owner, BigInt(data.deadline).valueOf(), byte32Value, data.signature],
         });
       }
     } catch (err) {
