@@ -9,26 +9,26 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-3">
+    <header className="w-full py-3 border-b border-gray-300 bg-white text-center">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6">
         {/* Left side: brand or logo */}
         <div className="flex items-center space-x-2">
           {/* Example logo placeholder */}
           <div className="h-8 w-8 rounded-full bg-gray-200">
-            <Image src="/icons/logo.svg" alt="Singular domains logo" width="40" height="40" />
+            <Image src="/icons/logo.svg" alt="Singular domains logo" width="40" height="40"/>
           </div>
-          <span className="text-lg font-semibold text-red-600">Singular Domain</span>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+            Singular <span className="text-blue-600">Domain</span>
+          </h1>
         </div>
 
         {/* Right side: nav & hamburger toggle */}
         <div className="flex items-center space-x-2 md:space-x-6">
-          {/* Hamburger button (shown on mobile) */}
           <button
             className="md:hidden"
             onClick={() => setIsOpen((prev) => !prev)}
             aria-label="Toggle Menu"
           >
-            {/* Simple Hamburger Icon (Tailwind Hero Icons style) */}
             <svg
               className="h-6 w-6 text-gray-800"
               fill="none"
@@ -46,25 +46,25 @@ export function Header() {
           <nav className="hidden items-center space-x-6 md:flex">
             <Link
               href="/"
-              className="text-sm font-bold text-gray-600 hover:text-red-600"
+              className="text-sm font-bold text-gray-600 hover:text-blue-500 transition duration-300"
             >
               Home
             </Link>
             <Link
               href="/about"
-              className="text-sm font-bold text-gray-600 hover:text-red-600"
+              className="text-sm font-bold text-gray-600 hover:text-blue-500 transition duration-300"
             >
               About
             </Link>
             <Link
               href="/contact"
-              className="text-sm font-bold text-gray-600 hover:text-red-600"
+              className="text-sm font-bold text-gray-600 hover:text-blue-500 transition duration-300"
             >
               Contact
             </Link>
 
             {/* RainbowKit Connect Button */}
-            <ConnectButton showBalance={false} label="Connect" />
+            <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" label="Connect"/>
           </nav>
         </div>
       </div>
@@ -95,7 +95,7 @@ export function Header() {
           </Link>
 
           {/* RainbowKit Connect Button */}
-          <ConnectButton showBalance={false} label="Connect" />
+          <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" label="Connect"/>
         </nav>
       )}
     </header>

@@ -1,14 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useAccount } from "wagmi"
+import {useState, useEffect} from "react"
+import {useAccount} from "wagmi"
 
-import { DomainList } from "@/components/domain-list"
+import {DomainList} from "@/components/domain-list"
 import {toast} from "sonner";
 import {ConnectButton} from "@rainbow-me/rainbowkit";
+import {DotPattern} from "@/components/ui/dot-pattern";
+import {cn} from "@/lib/utils";
+import {Loader2} from "lucide-react";
+import {Skeleton} from "@/components/ui/skeleton";
 
 export default function HomePage() {
-  const { address, isConnected } = useAccount()
+  const {address, isConnected} = useAccount()
   const [ensDomains, setEnsDomains] = useState<
     { name: string; owner: `0x${string}`, expiration?: string; action?: string }[]
   >([])
@@ -63,34 +67,68 @@ export default function HomePage() {
 
   if (!isConnected) {
     return (
-      <main className="flex flex-col items-center justify-center px-4 py-16 text-center">
-        <h1 className="mb-4 text-2xl font-bold">Welcome to Singular Domain</h1>
-        <p className="max-w-xl text-gray-600">
-          Singular Domain is a 1:1 claim project based on your ENS domains.
-          If you own <strong>.eth</strong> names, you can claim a corresponding
-          “Singular Domain” in our ecosystem. Claiming preserves your brand,
-          identity, and uniqueness in the web3 space.
-        </p>
+      <div
+        className="relative flex md:h-[600px] w-full flex-col items-center justify-center overflow-hidden rounded-lg  bg-background">
+        <section className="z-10 flex flex-col items-center justify-center px-4 py-16 text-center">
+          <div
+            className="text-5xl font-bold bg-gradient-to-r from-indigo-400 via-fuchsia-500 to-red-500 bg-clip-text text-transparent drop-shadow-lg">
+            <p>
+              Welcome to Singular Domain
+            </p>
+          </div>
 
-        <p className="mt-4 text-gray-600">
-          Connect your wallet to verify your ENS domains, then mint your 1:1
-          Singular Domains absolutely free!
-        </p>
+          <div className="p-6">
+            <p className="max-w-xl text-lg text-gray-700 leading-relaxed">
+              <span className="font-extrabold text-black">Singular Domain </span>
+               is a <span
+              className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500 font-bold">
+              1:1 claim project </span> based on your
+              <span className="text-indigo-500 font-semibold"> ENS domains</span>.
+              If you own <strong className="text-red-500">.eth</strong> names, you can claim a corresponding
+              <span className="text-green-500 font-bold"> “Singular Domain”</span> in our ecosystem.
+              <span className="italic text-gray-500">
+      Claiming preserves your brand, identity, and uniqueness in the Web3 space.
+    </span>
+            </p>
 
-        <div className="mt-8">
-          <ConnectButton showBalance={false} label="Connect"/>
-        </div>
-      </main>
-    )
+            <p className="mt-6 max-w-xl text-lg text-gray-700 leading-relaxed">
+              <span className="text-blue-500 font-bold">Connect your wallet</span> to verify your
+              <span className="text-indigo-500 font-semibold"> ENS domains</span>, then
+              <span className="text-purple-500 font-bold"> mint</span> your
+              <span className="text-green-500 font-bold"> 1:1 Singular Domains</span>
+              <span className="text-pink-500 font-bold"> absolutely free!</span>
+            </p>
+          </div>
+
+          <div className="mt-8">
+            <ConnectButton showBalance={false} accountStatus="avatar" chainStatus="icon" label="Connect"/>
+          </div>
+        </section>
+        <DotPattern
+          className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+          )}
+        />
+      </div>
+    );
   }
 
   return (
     <main className="px-4 py-8">
-      {loading && <p className="mt-2">Loading ENS data...</p>}
-      <h2 className="mb-6 text-xl font-semibold">
-        Your Singular Domains
-      </h2>
-      <DomainList domains={ensDomains}/>
+      {loading ? (
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <Skeleton className="h-6 w-3/4 bg-gray-200 rounded-md" />
+          <Skeleton className="h-6 w-1/2 bg-gray-200 rounded-md" />
+        </div>
+      ) : (
+          <div>
+            <h2 className="mb-6 text-xl font-semibold">
+              Your Singular Domains
+            </h2>
+            <DomainList domains={ensDomains}/>
+          </div>
+        )}
     </main>
   )
 }
