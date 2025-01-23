@@ -10,13 +10,15 @@ import {DotPattern} from "@/components/ui/dot-pattern";
 import {cn} from "@/lib/utils";
 import {Loader2} from "lucide-react";
 import {Skeleton} from "@/components/ui/skeleton";
+import {useCheckDomain} from "@/hooks/useCheckDomain";
 
 export default function HomePage() {
-  const {address, isConnected} = useAccount()
+  const {address, isConnected} = useAccount();
+  const {checkDomain} = useCheckDomain();
   const [ensDomains, setEnsDomains] = useState<
     { name: string; owner: `0x${string}`, expiration?: string; action?: string }[]
-  >([])
-  const [loading, setLoading] = useState(false)
+  >([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isConnected || !address) {
@@ -33,6 +35,7 @@ export default function HomePage() {
         const fetchedDomains = data.domains || []
 
         // Convert the data to the shape needed by DomainList
+        const labels: string[] = [];
         const mapped = fetchedDomains.map((d: { expiryDate: string; name: string; }) => {
           // The subgraph's expiryDate is a Unix timestamp in *seconds*
           let expiration = "--"
@@ -40,6 +43,7 @@ export default function HomePage() {
             const expirySec = parseInt(d.expiryDate, 10) * 1000
             expiration = new Date(expirySec).toISOString().split("T")[0]
           }
+          labels.push(d.name.split(".")[0]);
 
           return {
             name: d.name,
@@ -48,8 +52,19 @@ export default function HomePage() {
             action: "Claim",
           }
         })
-
-        setEnsDomains(mapped)
+        const listDomain = await checkDomain({domains: labels});
+        if (!listDomain || listDomain.length === 0) {
+          setEnsDomains(mapped);
+        } else {
+          const updatedDomains = mapped.map((d: { name: string; action: string}) => {
+            const domain = listDomain.find((ld: { label: string; }) => ld.label === d.name.split(".")[0]);
+            if (domain) {
+              d.action = domain.status === 'claimed' ? 'Manage' : domain.status === 'signed' ? 'Claiming' : 'Claim'
+            }
+            return d;
+          })
+          setEnsDomains(updatedDomains);
+        }
       } catch (err) {
         console.error("Error fetching ENS:", err)
         toast.error("Failed to fetch ENS domains.")
