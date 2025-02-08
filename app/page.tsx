@@ -25,65 +25,65 @@ export default function HomePage() {
   >([]);
   const [loading, setLoading] = useState(false);
 
+  async function fetchData() {
+    setLoading(true);
+    try {
+      // const res = await fetch(`/api/ens?owner=${address?.toLowerCase()}`)
+      const res = await fetch(
+        `/api/ens?owner=${"0xFc43582532E90Fa8726FE9cdb5FAd48f4e487d27".toLowerCase()}`
+      );
+      const data = await res.json();
+
+      const fetchedDomains = data.domains || [];
+
+      // Convert the data to the shape needed by DomainList
+      const labels: string[] = [];
+      const mapped = fetchedDomains.map(
+        (d: { expiryDate: string; name: string }) => {
+          // The subgraph's expiryDate is a Unix timestamp in *seconds*
+          let expiration = "--";
+          if (d.expiryDate) {
+            const expirySec = parseInt(d.expiryDate, 10) * 1000;
+            expiration = new Date(expirySec).toISOString().split("T")[0];
+          }
+          labels.push(d.name.split(".")[0]);
+
+          return {
+            name: d.name,
+            owner: address,
+            expiration,
+            action: "Claim",
+          };
+        }
+      );
+      const listDomain = await checkDomain({ domains: labels });
+      if (!listDomain || listDomain.length === 0) {
+        setEnsDomains(mapped);
+      } else {
+        const updatedDomains = mapped.map(
+          (d: { name: string; action: string }) => {
+            const domain = listDomain.find(
+              (ld: { label: string }) => ld.label === d.name.split(".")[0]
+            );
+            if (domain) {
+              d.action = domain.status === "claimed" ? "Manage" : "Claim";
+            }
+            return d;
+          }
+        );
+        setEnsDomains(updatedDomains);
+      }
+    } catch (err) {
+      console.error("Error fetching ENS:", err);
+      toast.error("Failed to fetch ENS domains.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (!isConnected || !address) {
       return;
-    }
-
-    async function fetchData() {
-      setLoading(true);
-      try {
-        // const res = await fetch(`/api/ens?owner=${address?.toLowerCase()}`)
-        const res = await fetch(
-          `/api/ens?owner=${"0xf01Dd015Bc442d872275A79b9caE84A6ff9B2A27".toLowerCase()}`
-        );
-        const data = await res.json();
-
-        const fetchedDomains = data.domains || [];
-
-        // Convert the data to the shape needed by DomainList
-        const labels: string[] = [];
-        const mapped = fetchedDomains.map(
-          (d: { expiryDate: string; name: string }) => {
-            // The subgraph's expiryDate is a Unix timestamp in *seconds*
-            let expiration = "--";
-            if (d.expiryDate) {
-              const expirySec = parseInt(d.expiryDate, 10) * 1000;
-              expiration = new Date(expirySec).toISOString().split("T")[0];
-            }
-            labels.push(d.name.split(".")[0]);
-
-            return {
-              name: d.name,
-              owner: address,
-              expiration,
-              action: "Claim",
-            };
-          }
-        );
-        const listDomain = await checkDomain({ domains: labels });
-        if (!listDomain || listDomain.length === 0) {
-          setEnsDomains(mapped);
-        } else {
-          const updatedDomains = mapped.map(
-            (d: { name: string; action: string }) => {
-              const domain = listDomain.find(
-                (ld: { label: string }) => ld.label === d.name.split(".")[0]
-              );
-              if (domain) {
-                d.action = domain.status === "claimed" ? "Manage" : "Claim";
-              }
-              return d;
-            }
-          );
-          setEnsDomains(updatedDomains);
-        }
-      } catch (err) {
-        console.error("Error fetching ENS:", err);
-        toast.error("Failed to fetch ENS domains.");
-      } finally {
-        setLoading(false);
-      }
     }
 
     fetchData().catch((err) => {
@@ -175,7 +175,7 @@ export default function HomePage() {
         </div>
       ) : (
         <div>
-          <DomainList domains={ensDomains} />
+          <DomainList domains={ensDomains} fetchData={fetchData} />
         </div>
       )}
     </main>

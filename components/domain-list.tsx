@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Table,
@@ -7,28 +7,31 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import {Button} from "@/components/ui/button"
-import {toast} from "sonner";
-import {useSignDomain} from "@/hooks/useSignDomain";
-import {useEffect, useState} from "react";
-import {useWaitForTransactionReceipt, useWriteContract, type BaseError} from 'wagmi';
-import {registryAbi} from "@/lib/abi/registry";
-import {padHex, toHex} from "viem";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useSignDomain } from "@/hooks/useSignDomain";
+import { useEffect, useState } from "react";
+import {
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  type BaseError,
+} from "wagmi";
+import { registryAbi } from "@/lib/abi/registry";
+import { padHex, toHex } from "viem";
 
-
-const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || '0x';
-const domainAddress = process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || '0x';
+const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
+const domainAddress = process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x";
 
 /**
  * Type definition for domain items
  * Adjust fields as needed (e.g., string, Date, etc.)
  */
 interface Domain {
-  name: string
-  owner: `0x${string}`
-  expiration?: string
-  action?: string
+  name: string;
+  owner: `0x${string}`;
+  expiration?: string;
+  action?: string;
 }
 
 /**
@@ -36,54 +39,71 @@ interface Domain {
  * - Takes in an array of Domain objects
  * - Shows "No domain" if the array is empty
  */
-export function DomainList({domains}: { domains: Domain[] }) {
-  const {signDomain, data, error: signErr, isMutating} = useSignDomain();
-  const {data: hash, error, writeContract} = useWriteContract();
+export function DomainList({
+  domains,
+  fetchData,
+}: {
+  domains: Domain[];
+  fetchData: () => void;
+}) {
+  const { signDomain, data, error: signErr, isMutating } = useSignDomain();
+  const { data: hash, error, writeContract } = useWriteContract();
   const [label, setLabel] = useState<string>("");
   const [owner, setOwner] = useState<string>("");
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
-    })
+    });
 
   const handleClaim = async (domain: Domain) => {
     try {
       if (!domain.expiration || domain.expiration === "--") {
         toast.error("Claim domain failed", {
           description: "Domain " + domain.name + " has no expiration date",
-        })
-        return
+        });
+        return;
       }
-      const name = domain.name.split(".")[0]
+      const name = domain.name.split(".")[0];
       setLabel(name);
       setOwner(domain.owner);
-      await signDomain({domain: name, expiration: Date.parse(domain.expiration), owner: domain.owner})
+      await signDomain({
+        domain: name,
+        expiration: Date.parse(domain.expiration),
+        owner: domain.owner,
+      });
     } catch (err) {
       console.error("Error claiming domain:", err);
     }
-  }
+  };
   const handleManage = (domain: Domain) => {
-    toast.success("Managing domain " + domain.name)
-  }
+    toast.success("Managing domain " + domain.name);
+  };
 
   useEffect(() => {
     try {
       if (isMutating) {
-        toast.loading("Claiming domain...")
+        toast.loading("Claiming domain...");
       } else if (signErr) {
         toast.dismiss();
         toast.error("Claim domain failed", {
           description: signErr.message,
-        })
+        });
       } else if (data) {
         console.log(data);
         const hexValue = toHex(Number(data.nonce));
-        const byte32Value = padHex(hexValue, {size: 32});
+        const byte32Value = padHex(hexValue, { size: 32 });
         writeContract({
           address: registryAddress as `0x${string}`,
           abi: registryAbi,
           functionName: "register",
-          args: [domainAddress as `0x${string}`, label, owner, BigInt(data.deadline).valueOf(), byte32Value, data.signature],
+          args: [
+            domainAddress as `0x${string}`,
+            label,
+            owner,
+            BigInt(data.deadline).valueOf(),
+            byte32Value,
+            data.signature,
+          ],
         });
       }
     } catch (err) {
@@ -105,6 +125,7 @@ export function DomainList({domains}: { domains: Domain[] }) {
     if (isConfirmed) {
       toast.dismiss();
       toast.success("Claimed domain success with hash: " + hash);
+      fetchData();
     }
   }, [error, isConfirming, isConfirmed, hash]);
 
@@ -136,9 +157,13 @@ export function DomainList({domains}: { domains: Domain[] }) {
                 <TableCell>{d.expiration || "--"}</TableCell>
                 <TableCell className="text-right">
                   {d.action === "Claim" ? (
-                    <Button variant="default" onClick={() => handleClaim(d)}>{d.action}</Button>
+                    <Button variant="default" onClick={() => handleClaim(d)}>
+                      {d.action}
+                    </Button>
                   ) : (
-                    <Button variant="secondary" onClick={() => handleManage(d)}>{d.action || "Manage"}</Button>
+                    <Button variant="secondary" onClick={() => handleManage(d)}>
+                      {d.action || "Manage"}
+                    </Button>
                   )}
                 </TableCell>
               </TableRow>
@@ -147,5 +172,5 @@ export function DomainList({domains}: { domains: Domain[] }) {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
