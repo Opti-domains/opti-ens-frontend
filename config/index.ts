@@ -1,4 +1,4 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import {
   arbitrum,
   base,
@@ -7,9 +7,11 @@ import {
   polygon,
   sepolia,
   Chain,
-} from 'wagmi/chains';
+  optimismSepolia,
+} from "wagmi/chains";
 
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || 'b56e18d47c72ab683b10814fe9495694'
+export const projectId =
+  process.env.NEXT_PUBLIC_PROJECT_ID || "b56e18d47c72ab683b10814fe9495694";
 
 export const localChain: Chain = {
   id: 31337,
@@ -19,18 +21,19 @@ export const localChain: Chain = {
     default: { http: ["http://127.0.0.1:8545"] },
     public: { http: ["http://127.0.0.1:8545"] },
   },
-}
+};
 
 export const config = getDefaultConfig({
-  appName: 'Singular Domains',
-  projectId: 'b56e18d47c72ab683b10814fe9495694',
+  appName: "Singular Domains",
+  projectId: "b56e18d47c72ab683b10814fe9495694",
   chains: [
     // mainnet,
     // polygon,
     // optimism,
     // arbitrum,
     // base,
-    localChain,
+    // localChain,
+    optimismSepolia,
     // ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
   ],
   ssr: true,
