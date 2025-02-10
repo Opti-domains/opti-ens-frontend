@@ -32,7 +32,7 @@ export const config = getDefaultConfig({
     // optimism,
     // arbitrum,
     // base,
-    // localChain,
+    localChain,
     optimismSepolia,
     // ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
   ],

@@ -19,6 +19,7 @@ import {
 } from "wagmi";
 import { registryAbi } from "@/lib/abi/registry";
 import { padHex, toHex } from "viem";
+import {ManageDialog} from "@/components/manage-dialog";
 
 const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
 const domainAddress = process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x";
@@ -27,7 +28,7 @@ const domainAddress = process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x";
  * Type definition for domain items
  * Adjust fields as needed (e.g., string, Date, etc.)
  */
-interface Domain {
+export interface Domain {
   name: string;
   owner: `0x${string}`;
   expiration?: string;
@@ -50,6 +51,8 @@ export function DomainList({
   const { data: hash, error, writeContract } = useWriteContract();
   const [label, setLabel] = useState<string>("");
   const [owner, setOwner] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
@@ -76,7 +79,9 @@ export function DomainList({
     }
   };
   const handleManage = (domain: Domain) => {
-    toast.success("Managing domain " + domain.name);
+    setOpen(!open);
+    setSelectedDomain(domain);
+    console.log("handle domain:", domain);
   };
 
   useEffect(() => {
@@ -171,6 +176,7 @@ export function DomainList({
           )}
         </TableBody>
       </Table>
+      <ManageDialog open={open} setOpen={setOpen} domain={selectedDomain}/>
     </div>
   );
 }
