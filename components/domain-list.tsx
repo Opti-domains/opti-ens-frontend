@@ -15,14 +15,14 @@ import { useEffect, useState } from "react";
 import {
   useWaitForTransactionReceipt,
   useWriteContract,
-  type BaseError,
+  type BaseError, useReadContract,
 } from "wagmi";
 import { registryAbi } from "@/lib/abi/registry";
 import { padHex, toHex } from "viem";
 import {ManageDialog} from "@/components/manage-dialog";
 
 const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
-const domainAddress = process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x";
+const domainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x") as `0x${string}`;
 
 /**
  * Type definition for domain items
@@ -34,6 +34,22 @@ export interface Domain {
   expiration?: string;
   action?: string;
 }
+
+const ROOT_DOMAIN_ABI = [
+  {
+    "type": "function",
+    "name": "resolver",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  }
+];
 
 /**
  * DomainList component
@@ -58,6 +74,14 @@ export function DomainList({
       hash,
     });
 
+  const {data: resolver} = useReadContract({
+    address: domainAddress,
+    abi: ROOT_DOMAIN_ABI,
+    functionName: 'resolver',
+    args: [],
+  });
+
+
   const handleClaim = async (domain: Domain) => {
     try {
       if (!domain.expiration || domain.expiration === "--") {
@@ -79,9 +103,11 @@ export function DomainList({
     }
   };
   const handleManage = (domain: Domain) => {
+    // fetch the resolver
     setOpen(!open);
     setSelectedDomain(domain);
     console.log("handle domain:", domain);
+    console.log("handle resolver:", resolver);
   };
 
   useEffect(() => {
@@ -102,7 +128,7 @@ export function DomainList({
           abi: registryAbi,
           functionName: "register",
           args: [
-            domainAddress as `0x${string}`,
+            domainAddress,
             label,
             owner,
             BigInt(data.deadline).valueOf(),
@@ -176,7 +202,7 @@ export function DomainList({
           )}
         </TableBody>
       </Table>
-      <ManageDialog open={open} setOpen={setOpen} domain={selectedDomain}/>
+      <ManageDialog open={open} setOpen={setOpen} domain={selectedDomain} resolverAddress={resolver as `0x${string}`}/>
     </div>
   );
 }

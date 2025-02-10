@@ -9,22 +9,77 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import { Plus, X } from "lucide-react";
 import {Label} from "@/components/ui/label";
 import {Domain} from "@/components/domain-list";
+import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
+import {toast} from "sonner";
+import {concat, encodeFunctionData, toHex} from "viem";
 
 type DialogDemoProps = {
   open: boolean,
   setOpen: (open: boolean) => void,
   domain: Domain | null,
+  resolverAddress: `0x${string}`,
 };
 
-export function ManageDialog({open, setOpen, domain}: DialogDemoProps) {
+const MULTICALL_ABI = [
+  {
+    "type": "function",
+    "name": "multicall",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  }];
+const OPTI_RESOLVER_ABI = [
+  {
+    "type": "function",
+    "name": "setText",
+    "inputs": [
+      {
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "key",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  }
+];
+
+export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDemoProps) {
   const [records, setRecords] = useState([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
   const [newLabel, setNewLabel] = useState("");
   const [addingLabel, setAddingLabel] = useState(false);
-  const [error, setError] = useState("");
+  const [typeError, setTypeError] = useState("");
+  const { data: hash, error: writeErr, writeContract } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
 
   const checkDuplicateLabel = (label: string) => {
     return records.some(record => record.label.toLowerCase() === label.toLowerCase());
@@ -54,11 +109,54 @@ export function ManageDialog({open, setOpen, domain}: DialogDemoProps) {
     const label = e.target.value;
     setNewLabel(label);
     if (checkDuplicateLabel(label)) {
-      setError(label+ " already exists");
+      setTypeError(label+ " already exists");
     } else {
-      setError("");
+      setTypeError("");
     }
   };
+
+  const handleSaveChange = () => {
+    if (!domain) return;
+    const label = domain.name.split(".")[0];
+    const prefix = toHex(label.length, { size: 1 });
+    const text = toHex(label);
+    const suffix = toHex(0, { size: 1 }); // 1-byte hex encoding
+    const dnsEncoded = concat([prefix, text, suffix]);
+
+    const calls = records.map((record) =>
+      encodeFunctionData({
+          abi: OPTI_RESOLVER_ABI,
+          functionName: 'setText',
+          args: [dnsEncoded, record.label, record.value],
+        })
+    );
+    console.log("Save changes calls", calls);
+
+    writeContract({
+      address: resolverAddress,
+      abi: MULTICALL_ABI,
+      functionName: 'multicall',
+      args: [calls],
+    });
+  }
+
+  useEffect(() => {
+    if (writeErr) {
+      toast.dismiss();
+      console.error("Error writing contract:", writeErr);
+      toast.error("Failed to set records!", { description: (writeErr as BaseError).shortMessage || writeErr.message });
+    }
+
+    if (isConfirming) {
+      toast.loading("Waiting for confirmation...");
+    }
+
+    if (isConfirmed) {
+      toast.dismiss();
+      setOpen(false);
+      toast.success("Set records successfully!");
+    }
+  }, [writeErr, isConfirmed, isConfirming]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -104,7 +202,7 @@ export function ManageDialog({open, setOpen, domain}: DialogDemoProps) {
                     onChange={handleLabelChange}
                     placeholder="Type a record name..."
                   />
-                  {error && <Label className="text-red-600 font-light">{error}</Label>}
+                  {typeError && <Label className="text-red-600 font-light">{typeError}</Label>}
                 </div>
                 {newLabel.trim() ? (
                   <Button
@@ -135,7 +233,7 @@ export function ManageDialog({open, setOpen, domain}: DialogDemoProps) {
 
         <div className="flex justify-center gap-2 ">
           <Button variant="outline" className="w-1/2" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button className="w-1/2" onClick={() => console.log("Updated Records:", records)}>Save</Button>
+          <Button className="w-1/2" onClick={handleSaveChange}>Save</Button>
         </div>
       </DialogContent>
     </Dialog>
