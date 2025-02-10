@@ -15,7 +15,10 @@ import {Label} from "@/components/ui/label";
 import {Domain} from "@/components/domain-list";
 import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
 import {toast} from "sonner";
-import {concat, encodeFunctionData, toHex} from "viem";
+import {encodeFunctionData} from "viem";
+import {dnsEncode} from "@/lib/utils";
+import {resolverABI} from "@/lib/abi/resolver";
+import {multicallABI} from "@/lib/abi/multical";
 
 type DialogDemoProps = {
   open: boolean,
@@ -23,52 +26,6 @@ type DialogDemoProps = {
   domain: Domain | null,
   resolverAddress: `0x${string}`,
 };
-
-const MULTICALL_ABI = [
-  {
-    "type": "function",
-    "name": "multicall",
-    "inputs": [
-      {
-        "name": "data",
-        "type": "bytes[]",
-        "internalType": "bytes[]"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "results",
-        "type": "bytes[]",
-        "internalType": "bytes[]"
-      }
-    ],
-    "stateMutability": "nonpayable"
-  }];
-const OPTI_RESOLVER_ABI = [
-  {
-    "type": "function",
-    "name": "setText",
-    "inputs": [
-      {
-        "name": "dnsEncoded",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "key",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "value",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  }
-];
 
 export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDemoProps) {
   const [records, setRecords] = useState([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
@@ -118,23 +75,19 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
   const handleSaveChange = () => {
     if (!domain) return;
     const label = domain.name.split(".")[0];
-    const prefix = toHex(label.length, { size: 1 });
-    const text = toHex(label);
-    const suffix = toHex(0, { size: 1 }); // 1-byte hex encoding
-    const dnsEncoded = concat([prefix, text, suffix]);
 
     const calls = records.map((record) =>
       encodeFunctionData({
-          abi: OPTI_RESOLVER_ABI,
+          abi: resolverABI,
           functionName: 'setText',
-          args: [dnsEncoded, record.label, record.value],
+          args: [dnsEncode(label), record.label, record.value],
         })
     );
     console.log("Save changes calls", calls);
 
     writeContract({
       address: resolverAddress,
-      abi: MULTICALL_ABI,
+      abi: multicallABI,
       functionName: 'multicall',
       args: [calls],
     });
