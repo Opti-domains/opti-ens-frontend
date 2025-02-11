@@ -33,7 +33,7 @@ export function useTextInfo(activeTab: string, label: string, resolverAddress: `
     );
   }, [activeTab, label]);
 
-  const { data, isSuccess } = useReadContract({
+  const { data, isSuccess, refetch } = useReadContract({
     address: resolverAddress,
     abi: multicallABI,
     functionName: "multicall",
@@ -52,5 +52,5 @@ export function useTextInfo(activeTab: string, label: string, resolverAddress: `
     }))
     : initialRecords;
 
-  return { textDecoded, isUpdate: isSuccess };
+  return { textDecoded, isUpdate: isSuccess, refetchText: refetch };
 }

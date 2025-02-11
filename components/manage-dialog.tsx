@@ -51,9 +51,9 @@ export function ManageDialog({ open, setOpen, domain, resolverAddress }: ManageD
 
   const label = useMemo(() => domain?.name?.split(".")[0] || "", [domain?.name]);
 
-  const { dataDecoded: otherData, isUpdate } = useOtherInfo(activeTab, label, resolverAddress);
-  const { addr: addressData, hasAddr: isAddressSuccess } = useAddressInfo(activeTab, label, resolverAddress);
-  const { textDecoded, isUpdate: textUpdate } = useTextInfo(activeTab, label, resolverAddress);
+  const { dataDecoded: otherData, isUpdate, refetchOther } = useOtherInfo(activeTab, label, resolverAddress);
+  const { addr: addressData, hasAddr: isAddressSuccess, refetchAddress } = useAddressInfo(activeTab, label, resolverAddress);
+  const { textDecoded, isUpdate: textUpdate, refetchText } = useTextInfo(activeTab, label, resolverAddress);
 
   const handleUpdateValue = useCallback((index: number, value: string) => {
     setState((prev) => {
@@ -134,6 +134,9 @@ export function ManageDialog({ open, setOpen, domain, resolverAddress }: ManageD
     if (isConfirmed) {
       toast.dismiss();
       setOpen(false);
+      refetchText();
+      refetchAddress();
+      refetchOther();
       setState({ records: initialRecords, contentHash: "", abi: "", address: "" });
       toast.success("Records updated successfully!");
     }

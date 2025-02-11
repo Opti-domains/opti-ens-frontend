@@ -23,7 +23,7 @@ export function useAddressInfo(activeTab: string, label: string, resolverAddress
     });
   }, [activeTab, label]);
 
-  const { data, isSuccess } = useReadContract({
+  const { data, isSuccess, refetch } = useReadContract({
     address: resolverAddress,
     abi: resolverABI,
     functionName: "addr",
@@ -38,5 +38,5 @@ export function useAddressInfo(activeTab: string, label: string, resolverAddress
     }
   }, [isSuccess, data]);
 
-  return { addr, hasAddr: isSuccess };
+  return { addr, hasAddr: isSuccess, refetchAddress: refetch };
 }

@@ -23,7 +23,7 @@ export function useOtherInfo(activeTab: string, label: string, resolverAddress: 
     ];
   }, [activeTab, label]);
 
-  const { data, isSuccess } = useReadContract({
+  const { data, isSuccess, refetch } = useReadContract({
     address: resolverAddress,
     abi: multicallABI,
     functionName: "multicall",
@@ -34,17 +34,27 @@ export function useOtherInfo(activeTab: string, label: string, resolverAddress: 
   useEffect(() => {
     if (isSuccess && data) {
       const results = data as `0x${string}`[];
-      const hexContentHash = decodeFunctionResult({ abi: resolverABI, functionName: "contenthash", data: results[0]}) as `0x${string}`;
-      const contentHash = hexToString(hexContentHash);
-      const hexABI = decodeFunctionResult({ abi: resolverABI, functionName: "getData", data: results[1] }) as `0x${string}`;
-      const abi = hexToString(hexABI);
+      if (results.length >= 2) {
+        const hexContentHash = decodeFunctionResult({
+          abi: resolverABI,
+          functionName: "contenthash",
+          data: results[0]
+        }) as `0x${string}`;
+        const contentHash = hexToString(hexContentHash);
+        const hexABI = decodeFunctionResult({
+          abi: resolverABI,
+          functionName: "getData",
+          data: results[1]
+        }) as `0x${string}`;
+        const abi = hexToString(hexABI);
 
-      setDataDecoded([
-        contentHash,
-        abi,
-      ]);
+        setDataDecoded([
+          contentHash,
+          abi,
+        ]);
+      }
     }
   }, [isSuccess, data]);
 
-  return { dataDecoded, isUpdate: isSuccess };
+  return { dataDecoded, isUpdate: isSuccess, refetchOther: refetch };
 }
