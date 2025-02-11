@@ -167,7 +167,7 @@ export default function HomePage() {
 
   return (
     <main className="px-4 py-8">
-      {loading ? (
+      {loading && ensDomains.length > 0 ? (
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
           <Skeleton className="h-6 w-3/4 bg-gray-200 rounded-md" />

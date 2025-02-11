@@ -4,15 +4,19 @@ import {decodeFunctionResult, encodeFunctionData, hexToString} from "viem";
 import {resolverABI} from "@/lib/abi/resolver";
 import {dnsEncode} from "@/lib/utils";
 import {useReadContract} from "wagmi";
-import {useEffect, useState} from "react";
+import {useEffect, useRef} from "react";
 import {multicallABI} from "@/lib/abi/multical";
 
-export function useOtherInfo(label: string|undefined, resolverAddress: `0x${string}`) {
-  const [calls, setCalls] = useState<`0x${string}`[]>([]);
+export function useOtherInfo(activeTab: string, label: string|undefined, resolverAddress: `0x${string}`) {
+  const calls = useRef<`0x${string}`[]>([]);
 
   useEffect(() => {
     if (!label) return;
-    setCalls([
+    if (activeTab !== "other") {
+      calls.current = [];
+      return;
+    }
+    calls.current = ([
       encodeFunctionData({
         abi: resolverABI,
         functionName: 'contenthash',
@@ -24,16 +28,16 @@ export function useOtherInfo(label: string|undefined, resolverAddress: `0x${stri
         args: [dnsEncode(label), "abi"],
       }),
     ]);
-  }, [label]);
+  }, [label, activeTab]);
 
   // Fetch data using Multicall
-  const { data, isLoading, isSuccess } = useReadContract({
+  const { data, isSuccess } = useReadContract({
     address: resolverAddress,
     abi: multicallABI,
     functionName: 'multicall',
-    args: [calls],
+    args: [calls.current],
     query: {
-      enabled: calls.length > 0,
+      enabled: calls.current.length > 0,
     }
   });
 
@@ -54,5 +58,5 @@ export function useOtherInfo(label: string|undefined, resolverAddress: `0x${stri
     return hexToString(result);
   });
 
-  return { dataDecoded, isLoading };
+  return { dataDecoded, isUpdate: dataDecoded.length > 0 };
 }

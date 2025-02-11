@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSignDomain } from "@/hooks/useSignDomain";
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import {
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -65,10 +65,10 @@ export function DomainList({
 }) {
   const { signDomain, data, error: signErr, isMutating } = useSignDomain();
   const { data: hash, error, writeContract } = useWriteContract();
-  const [label, setLabel] = useState<string>("");
-  const [owner, setOwner] = useState<string>("");
+  const label = useRef<string>("");
+  const owner = useRef<string>("");
+  const selectedDomain = useRef<Domain | null>(null);
   const [open, setOpen] = useState(false);
-  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
@@ -91,8 +91,8 @@ export function DomainList({
         return;
       }
       const name = domain.name.split(".")[0];
-      setLabel(name);
-      setOwner(domain.owner);
+      label.current = name;
+      owner.current = domain.owner;
       await signDomain({
         domain: name,
         expiration: Date.parse(domain.expiration),
@@ -104,8 +104,8 @@ export function DomainList({
   };
   const handleManage = (domain: Domain) => {
     // fetch the resolver
+    selectedDomain.current = domain;
     setOpen(!open);
-    setSelectedDomain(domain);
     console.log("handle domain:", domain);
     console.log("handle resolver:", resolver);
   };
@@ -129,8 +129,8 @@ export function DomainList({
           functionName: "register",
           args: [
             domainAddress,
-            label,
-            owner,
+            label.current,
+            owner.current,
             BigInt(data.deadline).valueOf(),
             byte32Value,
             data.signature,
@@ -140,7 +140,7 @@ export function DomainList({
     } catch (err) {
       console.error("Error claiming domain:", err);
     }
-  }, [isMutating, signErr, data, writeContract, label, owner]);
+  }, [isMutating, signErr, data]);
 
   useEffect(() => {
     if (error) {
@@ -159,6 +159,12 @@ export function DomainList({
       fetchData();
     }
   }, [error, isConfirming, isConfirmed, hash]);
+
+  useEffect(() => {
+    if(!open){
+      selectedDomain.current = null;
+    }
+  }, [open]);
 
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
@@ -202,7 +208,10 @@ export function DomainList({
           )}
         </TableBody>
       </Table>
-      <ManageDialog open={open} setOpen={setOpen} domain={selectedDomain} resolverAddress={resolver as `0x${string}`}/>
+
+      {open ? (
+      <ManageDialog open={open} setOpen={setOpen} domain={selectedDomain.current} resolverAddress={resolver as `0x${string}`}/>
+      ): null}
     </div>
   );
 }

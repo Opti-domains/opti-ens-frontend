@@ -42,7 +42,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
       hash,
     });
 
-  const {dataDecoded: dataOther} = useOtherInfo(domain?.name.split(".")[0], resolverAddress);
+  const {dataDecoded: dataOther, isUpdate} = useOtherInfo(activeTab, domain?.name.split(".")[0], resolverAddress);
 
   const checkDuplicateLabel = (label: string) => {
     return records.some(record => record.label.toLowerCase() === label.toLowerCase());
@@ -168,7 +168,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
       case "address":
         break;
       case "other":
-        if(dataOther.length > 0) {
+        if(isUpdate) {
           setContentHash(dataOther[0]);
           setAbi(dataOther[1]);
         } else {
@@ -177,7 +177,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
         }
         break;
     }
-  }, [activeTab]);
+  }, [activeTab, isUpdate]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
