@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCheckDomain } from "@/hooks/useCheckDomain";
-import {ManageDialog} from "@/components/manage-dialog";
 
 export default function HomePage() {
   const { address, isConnected } = useAccount();

@@ -15,10 +15,11 @@ import {Label} from "@/components/ui/label";
 import {Domain} from "@/components/domain-list";
 import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
 import {toast} from "sonner";
-import {encodeFunctionData} from "viem";
+import {encodeFunctionData, toHex} from "viem";
 import {dnsEncode} from "@/lib/utils";
 import {resolverABI} from "@/lib/abi/resolver";
 import {multicallABI} from "@/lib/abi/multical";
+import {useOtherInfo} from "@/hooks/useOtherInfo";
 
 type DialogDemoProps = {
   open: boolean,
@@ -28,15 +29,20 @@ type DialogDemoProps = {
 };
 
 export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDemoProps) {
+  const [activeTab, setActiveTab] = useState("text");
   const [records, setRecords] = useState([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
   const [newLabel, setNewLabel] = useState("");
   const [addingLabel, setAddingLabel] = useState(false);
   const [typeError, setTypeError] = useState("");
+  const [contentHash, setContentHash] = useState("");
+  const [abi, setAbi] = useState("");
   const { data: hash, error: writeErr, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
     });
+
+  const {dataDecoded: dataOther} = useOtherInfo(domain?.name.split(".")[0], resolverAddress);
 
   const checkDuplicateLabel = (label: string) => {
     return records.some(record => record.label.toLowerCase() === label.toLowerCase());
@@ -72,16 +78,13 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
     }
   };
 
-  const handleSaveChange = () => {
-    if (!domain) return;
-    const label = domain.name.split(".")[0];
-
+  const saveTextRecords = (label: string) => {
     const calls = records.map((record) =>
       encodeFunctionData({
-          abi: resolverABI,
-          functionName: 'setText',
-          args: [dnsEncode(label), record.label, record.value],
-        })
+        abi: resolverABI,
+        functionName: 'setText',
+        args: [dnsEncode(label), record.label, record.value],
+      })
     );
     console.log("Save changes calls", calls);
 
@@ -91,6 +94,49 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
       functionName: 'multicall',
       args: [calls],
     });
+  }
+
+  const saveOtherRecords = (label: string) => {
+    const calls =[];
+    if (contentHash) {
+      calls.push(encodeFunctionData({
+        abi: resolverABI,
+        functionName: 'setContenthash',
+        args: [dnsEncode(label), toHex(contentHash)],
+      }));
+    }
+    if (abi) {
+      calls.push(encodeFunctionData({
+        abi: resolverABI,
+        functionName: 'setData',
+        args: [dnsEncode(label),"abi", toHex(abi)],
+      }));
+    }
+
+    console.log("Save changes calls", calls);
+    writeContract({
+      address: resolverAddress,
+      abi: multicallABI,
+      functionName: 'multicall',
+      args: [calls],
+    });
+  }
+
+  const handleSaveChange = () => {
+    if (!domain) return;
+    const label = domain.name.split(".")[0];
+
+    switch (activeTab) {
+      case "text":
+        saveTextRecords(label);
+        break;
+      case "address":
+        // saveAddressRecords(label);
+        break;
+      case "other":
+        saveOtherRecords(label);
+        break;
+    }
   }
 
   useEffect(() => {
@@ -107,9 +153,31 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
     if (isConfirmed) {
       toast.dismiss();
       setOpen(false);
+      setContentHash("");
+      setAbi("");
+      setRecords([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
       toast.success("Set records successfully!");
     }
   }, [writeErr, isConfirmed, isConfirming]);
+
+  useEffect(() => {
+    switch (activeTab) {
+      case "text":
+        setRecords([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
+        break;
+      case "address":
+        break;
+      case "other":
+        if(dataOther.length > 0) {
+          setContentHash(dataOther[0]);
+          setAbi(dataOther[1]);
+        } else {
+          setContentHash("");
+          setAbi("");
+        }
+        break;
+    }
+  }, [activeTab]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -118,7 +186,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
           <DialogTitle>{domain? domain.name: "edit"} records</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="text" className="w-full my-4">
+        <Tabs defaultValue="text" onValueChange={setActiveTab} className="w-full my-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="text" className="font-bold">Text</TabsTrigger>
             <TabsTrigger value="address" className="font-bold">Address</TabsTrigger>
@@ -181,6 +249,34 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
                 <Plus className="w-4 h-4 mr-2" /> Add record
               </Button>
             )}
+          </TabsContent>
+          <TabsContent value="other" className="mt-4 space-y-4">
+            <div className="flex flex-col gap-2">
+              <div>
+                <Label className="font-bold text-gray-500 text-sm">Content hash</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  className="text-gray-500"
+                  value={contentHash}
+                  onChange={(e) => setContentHash(e.target.value)}
+                  placeholder="e.g. ipfs://"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div>
+                <Label className="font-bold text-gray-500 text-sm">ABI</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  className="text-gray-500"
+                  value={abi}
+                  onChange={(e) => setAbi(e.target.value)}
+                  placeholder="Enter ABI..."
+                />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
