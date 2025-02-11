@@ -67,7 +67,7 @@ export function DomainList({
   const { data: hash, error, writeContract } = useWriteContract();
   const label = useRef<string>("");
   const owner = useRef<string>("");
-  const selectedDomain = useRef<Domain | null>(null);
+  const selectedDomain = useRef<Domain>({} as Domain);
   const [open, setOpen] = useState(false);
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -162,7 +162,7 @@ export function DomainList({
 
   useEffect(() => {
     if(!open){
-      selectedDomain.current = null;
+      selectedDomain.current = {} as Domain;
     }
   }, [open]);
 

@@ -10,7 +10,6 @@ import {
 import { Input } from "@/components/ui/input"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useEffect, useState} from "react";
-import { Plus, X } from "lucide-react";
 import {Label} from "@/components/ui/label";
 import {Domain} from "@/components/domain-list";
 import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
@@ -21,20 +20,31 @@ import {resolverABI} from "@/lib/abi/resolver";
 import {multicallABI} from "@/lib/abi/multical";
 import {useOtherInfo} from "@/hooks/useOtherInfo";
 import {useAddressInfo} from "@/hooks/useAddressInfo";
+import {useTextInfo} from "@/hooks/useTextInfo";
 
 type DialogDemoProps = {
   open: boolean,
   setOpen: (open: boolean) => void,
-  domain: Domain | null,
+  domain: Domain,
   resolverAddress: `0x${string}`,
 };
+type TextRecord = {
+  label: string;
+  value: string;
+}
+
+export const initialRecords: TextRecord[] = [
+  { label: "avatar", value: "" },
+  { label: "url", value: "" },
+  { label: "twitter", value: "" },
+  { label: "github", value: "" },
+  { label: "description", value: "" }
+];
 
 export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDemoProps) {
   const [activeTab, setActiveTab] = useState("text");
-  const [records, setRecords] = useState([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
-  const [newLabel, setNewLabel] = useState("");
-  const [addingLabel, setAddingLabel] = useState(false);
-  const [typeError, setTypeError] = useState("");
+  const [records, setRecords] = useState(initialRecords);
+  // const [typeError, setTypeError] = useState("");
   const [contentHash, setContentHash] = useState("");
   const [abi, setAbi] = useState("");
   const [address, setAddress] = useState("");
@@ -46,39 +56,12 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
 
   const {dataDecoded: dataOther, isUpdate} = useOtherInfo(activeTab, domain?.name.split(".")[0], resolverAddress);
   const {addr: addressData, hasAddr: isAddressSuccess} = useAddressInfo(activeTab, domain?.name.split(".")[0], resolverAddress);
-
-  const checkDuplicateLabel = (label: string) => {
-    return records.some(record => record.label.toLowerCase() === label.toLowerCase());
-  };
-
-  const handleAddRecord = () => {
-    if (newLabel.trim()) {
-      setRecords([...records, { label: newLabel, value: "" }]);
-      setNewLabel("");
-      setAddingLabel(false);
-    }
-  };
+  const {textDecoded, isUpdate: textUpdate} = useTextInfo(activeTab, domain.name.split(".")[0], resolverAddress);
 
   const handleUpdateValue = (index: number, value: string) => {
     const updatedRecords = [...records];
     updatedRecords[index].value = value;
     setRecords(updatedRecords);
-  };
-
-  const handleRemoveRecord = (index: number) => {
-    setRecords(records.filter((_, i) => i !== index));
-  };
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const handleLabelChange = (e) => {
-    const label = e.target.value;
-    setNewLabel(label);
-    if (checkDuplicateLabel(label)) {
-      setTypeError(label+ " already exists");
-    } else {
-      setTypeError("");
-    }
   };
 
   const saveTextRecords = (label: string) => {
@@ -177,7 +160,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
       setOpen(false);
       setContentHash("");
       setAbi("");
-      setRecords([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
+      setRecords(initialRecords);
       toast.success("Set records successfully!");
     }
   }, [writeErr, isConfirmed, isConfirming]);
@@ -185,7 +168,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
   useEffect(() => {
     switch (activeTab) {
       case "text":
-        setRecords([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
+        setRecords(textDecoded);
         break;
       case "address":
         setAddress(addressData);
@@ -200,7 +183,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
         }
         break;
     }
-  }, [activeTab, isUpdate, isAddressSuccess]);
+  }, [activeTab, isUpdate, isAddressSuccess, textUpdate]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -229,49 +212,9 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
                     onChange={(e) => handleUpdateValue(index, e.target.value)}
                     placeholder={`Enter value for ${record.label}`}
                   />
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveRecord(index)}>
-                    <X className="w-4 h-4 text-gray-400" />
-                  </Button>
                 </div>
               </div>
             ))}
-
-            {addingLabel ? (
-              <div
-                className="flex items-center gap-2 border rounded-lg px-3 py-3 bg-gray-100">
-                <div className="w-full">
-                  <Input
-                    className="bg-white"
-                    value={newLabel}
-                    onChange={handleLabelChange}
-                    placeholder="Type a record name..."
-                  />
-                  {typeError && <Label className="text-red-600 font-light">{typeError}</Label>}
-                </div>
-                {newLabel.trim() ? (
-                  <Button
-                    variant="ghost"
-                    className="font-bold text-red-600"
-                    onClick={handleAddRecord}
-                  >
-                    Add
-                  </Button>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="font-bold text-gray-400"
-                    onClick={() => setAddingLabel(false)}
-                  >
-                    Cancel
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <Button onClick={() => setAddingLabel(true)} variant="outline"
-                      className="w-full flex items-center justify-center font-bold text-gray-500 text-xl">
-                <Plus className="w-4 h-4 mr-2" /> Add record
-              </Button>
-            )}
           </TabsContent>
           <TabsContent value="address" className="mt-4 space-y-4">
             <div className="flex flex-col gap-2">
