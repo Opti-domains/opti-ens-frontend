@@ -15,11 +15,12 @@ import {Label} from "@/components/ui/label";
 import {Domain} from "@/components/domain-list";
 import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
 import {toast} from "sonner";
-import {encodeFunctionData, toHex} from "viem";
+import {encodeFunctionData, isAddress, toHex} from "viem";
 import {dnsEncode} from "@/lib/utils";
 import {resolverABI} from "@/lib/abi/resolver";
 import {multicallABI} from "@/lib/abi/multical";
 import {useOtherInfo} from "@/hooks/useOtherInfo";
+import {useAddressInfo} from "@/hooks/useAddressInfo";
 
 type DialogDemoProps = {
   open: boolean,
@@ -36,6 +37,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
   const [typeError, setTypeError] = useState("");
   const [contentHash, setContentHash] = useState("");
   const [abi, setAbi] = useState("");
+  const [address, setAddress] = useState("");
   const { data: hash, error: writeErr, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -43,6 +45,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
     });
 
   const {dataDecoded: dataOther, isUpdate} = useOtherInfo(activeTab, domain?.name.split(".")[0], resolverAddress);
+  const {addr: addressData, hasAddr: isAddressSuccess} = useAddressInfo(activeTab, domain?.name.split(".")[0], resolverAddress);
 
   const checkDuplicateLabel = (label: string) => {
     return records.some(record => record.label.toLowerCase() === label.toLowerCase());
@@ -122,6 +125,25 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
     });
   }
 
+  const saveAddressRecords = (label: string) => {
+    // validate address
+    if (!address) {
+      toast.error("Please enter address");
+      return;
+    }
+    // validate is EVM address
+    if (!isAddress(address)) {
+      toast.error("Invalid address");
+      return;
+    }
+    writeContract({
+      address: resolverAddress,
+      abi: resolverABI,
+      functionName: 'setAddr',
+      args: [dnsEncode(label), address],
+    });
+  }
+
   const handleSaveChange = () => {
     if (!domain) return;
     const label = domain.name.split(".")[0];
@@ -131,7 +153,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
         saveTextRecords(label);
         break;
       case "address":
-        // saveAddressRecords(label);
+        saveAddressRecords(label);
         break;
       case "other":
         saveOtherRecords(label);
@@ -166,6 +188,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
         setRecords([{ label: "avatar", value: "https://euc.li/sepolia/ez42.eth" }]);
         break;
       case "address":
+        setAddress(addressData);
         break;
       case "other":
         if(isUpdate) {
@@ -177,7 +200,7 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
         }
         break;
     }
-  }, [activeTab, isUpdate]);
+  }, [activeTab, isUpdate, isAddressSuccess]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -249,6 +272,21 @@ export function ManageDialog({open, setOpen, domain, resolverAddress}: DialogDem
                 <Plus className="w-4 h-4 mr-2" /> Add record
               </Button>
             )}
+          </TabsContent>
+          <TabsContent value="address" className="mt-4 space-y-4">
+            <div className="flex flex-col gap-2">
+              <div>
+                <Label className="font-bold text-gray-500 text-sm">ETH</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  className="text-gray-500"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Enter address..."
+                />
+              </div>
+            </div>
           </TabsContent>
           <TabsContent value="other" className="mt-4 space-y-4">
             <div className="flex flex-col gap-2">
