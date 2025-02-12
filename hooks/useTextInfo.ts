@@ -2,10 +2,10 @@
 
 import { decodeFunctionResult, encodeFunctionData } from "viem";
 import { resolverABI } from "@/lib/abi/resolver";
+import { multicallABI } from "@/lib/abi/multical";
 import { dnsEncode } from "@/lib/utils";
 import { useReadContract } from "wagmi";
-import { useEffect, useRef } from "react";
-import { multicallABI } from "@/lib/abi/multical";
+import { useState, useEffect, useRef } from "react";
 
 const initialRecords = [
   { label: "avatar", value: "" },
@@ -15,7 +15,15 @@ const initialRecords = [
   { label: "description", value: "" },
 ];
 
-export function useTextInfo(activeTab: string, label: string, resolverAddress: `0x${string}`) {
+export function useTextInfo(
+  activeTab: string,
+  label: string,
+  resolverAddress: `0x${string}`
+) {
+  // Local state to store final decoded text data
+  const [textDecoded, setTextDecoded] = useState(initialRecords);
+
+  // Build the array of calls for multicall
   const callTexts = useRef<`0x${string}`[]>([]);
 
   useEffect(() => {
@@ -24,6 +32,7 @@ export function useTextInfo(activeTab: string, label: string, resolverAddress: `
       return;
     }
 
+    // For each record label, encode resolver's text(...) call
     callTexts.current = initialRecords.map((record) =>
       encodeFunctionData({
         abi: resolverABI,
@@ -33,24 +42,41 @@ export function useTextInfo(activeTab: string, label: string, resolverAddress: `
     );
   }, [activeTab, label]);
 
+  // Perform the multicall on the array of "text(...)" calls
   const { data, isSuccess, refetch } = useReadContract({
     address: resolverAddress,
     abi: multicallABI,
     functionName: "multicall",
     args: [callTexts.current],
-    query: { enabled: callTexts.current.length > 0 },
+    query: { enabled: callTexts.current.length > 0 }, // only run if we have calls
   });
 
-  const textDecoded = isSuccess && data
-    ? (data as `0x${string}`[]).map((result, i) => ({
-      label: initialRecords[i].label,
-      value: decodeFunctionResult({
-        abi: resolverABI,
-        functionName: "text",
-        data: result,
-      }) as string,
-    }))
-    : initialRecords;
+  // Once we get 'data', decode each text result and update local state
+  useEffect(() => {
+    if (isSuccess && data) {
+      const results = data as `0x${string}`[];
+      if (results.length === initialRecords.length) {
+        const decoded = results.map((res, i) => {
+          const value = decodeFunctionResult({
+            abi: resolverABI,
+            functionName: "text",
+            data: res,
+          }) as string;
 
-  return { textDecoded, isUpdate: isSuccess, refetchText: refetch };
+          return {
+            label: initialRecords[i].label,
+            value,
+          };
+        });
+
+        setTextDecoded(decoded);
+      }
+    }
+  }, [isSuccess, data]);
+
+  return {
+    textDecoded,       // your array of { label, value }
+    isUpdate: isSuccess,
+    refetchText: refetch,
+  };
 }
