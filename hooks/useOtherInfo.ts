@@ -1,6 +1,6 @@
 "use client";
 
-import {decodeFunctionResult, encodeFunctionData, hexToString, toHex} from "viem";
+import {decodeFunctionResult, encodeFunctionData, hexToString} from "viem";
 import { resolverABI } from "@/lib/abi/resolver";
 import { dnsEncode } from "@/lib/utils";
 import { useReadContract } from "wagmi";

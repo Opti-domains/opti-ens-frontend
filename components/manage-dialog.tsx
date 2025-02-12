@@ -1,35 +1,35 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import {Input} from "@/components/ui/input";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Label } from "@/components/ui/label";
-import { Domain } from "@/components/domain-list";
+import {useState, useEffect, useCallback, useMemo} from "react";
+import {Label} from "@/components/ui/label";
+import {Domain} from "@/components/domain-list";
 import {
   useWaitForTransactionReceipt,
   useWriteContract,
   type BaseError,
 } from "wagmi";
-import { toast } from "sonner";
-import { encodeFunctionData, isAddress, toHex } from "viem";
-import { dnsEncode } from "@/lib/utils";
-import { resolverABI } from "@/lib/abi/resolver";
-import { multicallABI } from "@/lib/abi/multical";
-import { useOtherInfo } from "@/hooks/useOtherInfo";
-import { useAddressInfo } from "@/hooks/useAddressInfo";
-import { useTextInfo } from "@/hooks/useTextInfo";
+import {toast} from "sonner";
+import {encodeFunctionData, isAddress, toHex} from "viem";
+import {dnsEncode} from "@/lib/utils";
+import {resolverABI} from "@/lib/abi/resolver";
+import {multicallABI} from "@/lib/abi/multical";
+import {useOtherInfo} from "@/hooks/useOtherInfo";
+import {useAddressInfo} from "@/hooks/useAddressInfo";
+import {useTextInfo} from "@/hooks/useTextInfo";
 
 type ManageDialogProps = {
   open: boolean;
@@ -39,11 +39,11 @@ type ManageDialogProps = {
 };
 
 export const initialRecords = [
-  { label: "avatar", value: "" },
-  { label: "url", value: "" },
-  { label: "twitter", value: "" },
-  { label: "github", value: "" },
-  { label: "description", value: "" },
+  {label: "avatar", value: ""},
+  {label: "url", value: ""},
+  {label: "twitter", value: ""},
+  {label: "github", value: ""},
+  {label: "description", value: ""},
 ];
 
 export function ManageDialog({
@@ -64,11 +64,11 @@ export function ManageDialog({
   });
 
   // Wagmi writes
-  const { data: hash, error: writeErr, writeContract } = useWriteContract();
+  const {data: hash, error: writeErr, writeContract} = useWriteContract();
   const {
     isLoading: isConfirming,
     isSuccess: isConfirmed,
-  } = useWaitForTransactionReceipt({ hash });
+  } = useWaitForTransactionReceipt({hash});
 
   // Extract the subdomain label from "uni.eth" => "uni"
   const label = useMemo(() => {
@@ -83,12 +83,10 @@ export function ManageDialog({
   } = useOtherInfo(activeTab, label, resolverAddress);
   const {
     addr: addressData,
-    hasAddr: isAddressSuccess,
     refetchAddress,
   } = useAddressInfo(activeTab, label, resolverAddress);
   const {
     textDecoded,
-    isUpdate: textUpdate,
     refetchText,
   } = useTextInfo(activeTab, label, resolverAddress);
 
@@ -120,7 +118,7 @@ export function ManageDialog({
     setState((prev) => {
       const updated = [...prev.records];
       updated[index].value = value;
-      return { ...prev, records: updated };
+      return {...prev, records: updated};
     });
   }, []);
 
@@ -240,9 +238,9 @@ export function ManageDialog({
    */
   useEffect(() => {
     if (activeTab === "text") {
-      setState((prev) => ({ ...prev, records: textDecoded }));
+      setState((prev) => ({...prev, records: textDecoded}));
     } else if (activeTab === "address") {
-      setState((prev) => ({ ...prev, address: addressData }));
+      setState((prev) => ({...prev, address: addressData}));
     } else if (activeTab === "other") {
       if (isUpdate) {
         setState((prev) => ({
