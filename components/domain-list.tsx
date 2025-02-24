@@ -11,18 +11,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSignDomain } from "@/hooks/useSignDomain";
-import {useCallback, useEffect, useState} from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useWaitForTransactionReceipt,
   useWriteContract,
-  type BaseError, useReadContract,
+  type BaseError,
+  useReadContract,
 } from "wagmi";
 import { registryAbi } from "@/lib/abi/registry";
 import { padHex, toHex } from "viem";
-import {ManageDialog} from "@/components/manage-dialog";
+import { ManageDialog } from "@/components/manage-dialog";
 
 const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
-const domainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x") as `0x${string}`;
+const domainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS ||
+  "0x") as `0x${string}`;
 
 /**
  * Type definition for domain items
@@ -37,18 +39,18 @@ export interface Domain {
 
 const ROOT_DOMAIN_ABI = [
   {
-    "type": "function",
-    "name": "resolver",
-    "inputs": [],
-    "outputs": [
+    type: "function",
+    name: "resolver",
+    inputs: [],
+    outputs: [
       {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
     ],
-    "stateMutability": "view"
-  }
+    stateMutability: "view",
+  },
 ];
 
 /**
@@ -74,29 +76,34 @@ export function DomainList({
       hash,
     });
 
-  const {data: resolver} = useReadContract({
+  const { data: resolver } = useReadContract({
     address: domainAddress,
     abi: ROOT_DOMAIN_ABI,
-    functionName: 'resolver',
+    functionName: "resolver",
     args: [],
   });
 
-  const handleClaim = useCallback(async (domain: Domain) => {
-    if (!domain.expiration || domain.expiration === "--") {
-      toast.error("Claim failed", { description: `Domain ${domain.name} has no expiration date.` });
-      return;
-    }
+  const handleClaim = useCallback(
+    async (domain: Domain) => {
+      if (!domain.expiration || domain.expiration === "--") {
+        toast.error("Claim failed", {
+          description: `Domain ${domain.name} has no expiration date.`,
+        });
+        return;
+      }
 
-    try {
-      await signDomain({
-        domain: domain.name.split(".")[0],
-        expiration: Date.parse(domain.expiration),
-        owner: domain.owner,
-      });
-    } catch (err) {
-      console.error("Error claiming domain:", err);
-    }
-  }, [signDomain]);
+      try {
+        await signDomain({
+          domain: domain.name.split(".")[0],
+          expiration: Date.parse(domain.expiration),
+          owner: domain.owner,
+        });
+      } catch (err) {
+        console.error("Error claiming domain:", err);
+      }
+    },
+    [signDomain]
+  );
 
   const handleManage = useCallback((domain: Domain) => {
     setSelectedDomain(domain);
@@ -111,6 +118,15 @@ export function DomainList({
       toast.error("Claim failed", { description: signErr.message });
     } else if (data) {
       const byte32Value = padHex(toHex(Number(data.nonce)), { size: 32 });
+
+      console.log([
+        domainAddress,
+        data.domain,
+        data.owner,
+        BigInt(data.deadline).valueOf(),
+        byte32Value,
+        data.signature,
+      ]);
 
       writeContract({
         address: registryAddress as `0x${string}`,
@@ -131,7 +147,9 @@ export function DomainList({
   useEffect(() => {
     if (error) {
       toast.dismiss();
-      toast.error("Claim failed", { description: (error as BaseError).shortMessage || error.message });
+      toast.error("Claim failed", {
+        description: (error as BaseError).shortMessage || error.message,
+      });
     }
     if (isConfirming) {
       toast.loading("Confirming transaction...");
@@ -142,7 +160,6 @@ export function DomainList({
       fetchData();
     }
   }, [error, isConfirming, isConfirmed, fetchData]);
-
 
   // const handleClaim = async (domain: Domain) => {
   //   try {
@@ -260,7 +277,7 @@ export function DomainList({
                       {d.action}
                     </Button>
                   ) : (
-                    <Button variant="secondary" onClick={() => handleManage(d)}>
+                    <Button variant="default" onClick={() => handleManage(d)}>
                       {d.action || "Manage"}
                     </Button>
                   )}
@@ -272,7 +289,12 @@ export function DomainList({
       </Table>
 
       {open && selectedDomain && (
-        <ManageDialog open={open} setOpen={setOpen} domain={selectedDomain} resolverAddress={resolver as `0x${string}`} />
+        <ManageDialog
+          open={open}
+          setOpen={setOpen}
+          domain={selectedDomain}
+          resolverAddress={resolver as `0x${string}`}
+        />
       )}
     </div>
   );

@@ -28,22 +28,21 @@ export default function HomePage() {
   async function fetchData() {
     setLoading(true);
     try {
-      // const res = await fetch(`/api/ens?owner=${address?.toLowerCase()}`)
       const res = await fetch(
-        `/api/ens?owner=${"0xFc43582532E90Fa8726FE9cdb5FAd48f4e487d27".toLowerCase()}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/domain/list/${address}`
       );
       const data = await res.json();
 
-      const fetchedDomains = data.domains || [];
+      const fetchedDomains = data || [];
 
       // Convert the data to the shape needed by DomainList
       const labels: string[] = [];
       const mapped = fetchedDomains.map(
-        (d: { expiryDate: string; name: string }) => {
+        (d: { expiration: string; name: string }) => {
           // The subgraph's expiryDate is a Unix timestamp in *seconds*
           let expiration = "--";
-          if (d.expiryDate) {
-            const expirySec = parseInt(d.expiryDate, 10) * 1000;
+          if (d.expiration) {
+            const expirySec = parseInt(d.expiration, 10) * 1000;
             expiration = new Date(expirySec).toISOString().split("T")[0];
           }
           labels.push(d.name.split(".")[0]);
@@ -56,22 +55,24 @@ export default function HomePage() {
           };
         }
       );
-      const listDomain = await checkDomain({ domains: labels });
-      if (!listDomain || listDomain.length === 0) {
-        setEnsDomains(mapped);
-      } else {
-        const updatedDomains = mapped.map(
-          (d: { name: string; action: string }) => {
-            const domain = listDomain.find(
-              (ld: { label: string }) => ld.label === d.name.split(".")[0]
-            );
-            if (domain) {
-              d.action = domain.status === "claimed" ? "Manage" : "Claim";
+      if (labels.length > 0) {
+        const listDomain = await checkDomain({ domains: labels });
+        if (!listDomain || listDomain.length === 0) {
+          setEnsDomains(mapped);
+        } else {
+          const updatedDomains = mapped.map(
+            (d: { name: string; action: string }) => {
+              const domain = listDomain.find(
+                (ld: { label: string }) => ld.label === d.name.split(".")[0]
+              );
+              if (domain) {
+                d.action = domain.status === "claimed" ? "Manage" : "Claim";
+              }
+              return d;
             }
-            return d;
-          }
-        );
-        setEnsDomains(updatedDomains);
+          );
+          setEnsDomains(updatedDomains);
+        }
       }
     } catch (err) {
       console.error("Error fetching ENS:", err);

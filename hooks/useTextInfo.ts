@@ -5,14 +5,14 @@ import { resolverABI } from "@/lib/abi/resolver";
 import { multicallABI } from "@/lib/abi/multical";
 import { dnsEncode } from "@/lib/utils";
 import { useReadContract } from "wagmi";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const initialRecords = [
-  { label: "avatar", value: "" },
-  { label: "url", value: "" },
-  { label: "twitter", value: "" },
-  { label: "github", value: "" },
-  { label: "description", value: "" },
+  { label: "Twitter", key: "com.twitter", value: "" },
+  { label: "Github", key: "com.github", value: "" },
+  { label: "Telegram", key: "org.telegram", value: "" },
+  { label: "Discord", key: "com.discord", value: "" },
+  { label: "Farcaster", key: "xyz.farcaster", value: "" },
 ];
 
 export function useTextInfo(
@@ -24,22 +24,23 @@ export function useTextInfo(
   const [textDecoded, setTextDecoded] = useState(initialRecords);
 
   // Build the array of calls for multicall
-  const callTexts = useRef<`0x${string}`[]>([]);
+  const [callTexts, setCallTexts] = useState<`0x${string}`[]>([]);
 
   useEffect(() => {
-    if (activeTab !== "text") {
-      callTexts.current = [];
+    if (activeTab !== "social") {
+      setCallTexts([]);
       return;
     }
 
     // For each record label, encode resolver's text(...) call
-    callTexts.current = initialRecords.map((record) =>
+    const calls = initialRecords.map((record) =>
       encodeFunctionData({
         abi: resolverABI,
         functionName: "text",
-        args: [dnsEncode(label), record.label],
+        args: [dnsEncode(label), record.key],
       })
     );
+    setCallTexts(calls);
   }, [activeTab, label]);
 
   // Perform the multicall on the array of "text(...)" calls
@@ -47,8 +48,8 @@ export function useTextInfo(
     address: resolverAddress,
     abi: multicallABI,
     functionName: "multicall",
-    args: [callTexts.current],
-    query: { enabled: callTexts.current.length > 0 }, // only run if we have calls
+    args: [callTexts],
+    query: { enabled: callTexts.length > 0 }, // only run if we have calls
   });
 
   // Once we get 'data', decode each text result and update local state
@@ -65,6 +66,7 @@ export function useTextInfo(
 
           return {
             label: initialRecords[i].label,
+            key: initialRecords[i].key,
             value,
           };
         });
@@ -75,7 +77,7 @@ export function useTextInfo(
   }, [isSuccess, data]);
 
   return {
-    textDecoded,       // your array of { label, value }
+    textDecoded, // your array of { label, value }
     isUpdate: isSuccess,
     refetchText: refetch,
   };

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import '@rainbow-me/rainbowkit/styles.css';
-import {Header} from "@/components/header";
-import {Footer} from "@/components/footer";
+import "@rainbow-me/rainbowkit/styles.css";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import ContextProvider from "@/context";
-import {Toaster} from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,14 +33,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <ContextProvider>
-        <Header />
-        <main className="mx-auto max-w-screen-xl px-4 py-8">
-          {children}
-        </main>
-        <Footer />
-        <Toaster />
-      </ContextProvider>
+        <ContextProvider>
+          <Header />
+          <main className="mx-auto max-w-screen-xl px-4 py-8">{children}</main>
+          {/* <Footer /> */}
+          <Toaster />
+        </ContextProvider>
       </body>
     </html>
   );

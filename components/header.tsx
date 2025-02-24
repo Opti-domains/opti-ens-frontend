@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { useState } from "react";
+import Link from "next/link";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 
 export function Header() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <header className="w-full py-3 border-b border-gray-300 bg-white text-center">
@@ -15,10 +15,15 @@ export function Header() {
         <div className="flex items-center space-x-2">
           {/* Example logo placeholder */}
           <div className="h-8 w-8 rounded-full bg-gray-200">
-            <Image src="/icons/logo.svg" alt="Singular domains logo" width="40" height="40"/>
+            <Image
+              src="/icons/logo.svg"
+              alt="Singular domains logo"
+              width="40"
+              height="40"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-            Singular <span className="text-blue-600">Domain</span>
+            Opti.Domains <span className="text-blue-600">ENS L2</span>
           </h1>
         </div>
 
@@ -44,7 +49,7 @@ export function Header() {
 
           {/* Desktop Nav (hidden on small screens) */}
           <nav className="hidden items-center space-x-6 md:flex">
-            <Link
+            {/* <Link
               href="/"
               className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
             >
@@ -61,10 +66,15 @@ export function Header() {
               className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
             >
               Contact
-            </Link>
+            </Link> */}
 
             {/* RainbowKit Connect Button */}
-            <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" label="Connect"/>
+            <ConnectButton
+              showBalance={false}
+              accountStatus="address"
+              chainStatus="icon"
+              label="Connect"
+            />
           </nav>
         </div>
       </div>
@@ -95,9 +105,14 @@ export function Header() {
           </Link>
 
           {/* RainbowKit Connect Button */}
-          <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" label="Connect"/>
+          <ConnectButton
+            showBalance={false}
+            accountStatus="address"
+            chainStatus="icon"
+            label="Connect"
+          />
         </nav>
       )}
     </header>
-  )
+  );
 }

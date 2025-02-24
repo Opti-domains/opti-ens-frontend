@@ -1,16 +1,17 @@
-"use client"
+"use client";
 
-import useSWRMutation from "swr/mutation"
+import useSWRMutation from "swr/mutation";
 
-export const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5100/api"
+export const backendUrl =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5100/api";
 
 /**
  * Type for the payload we send to the API
  */
 interface SignDomainPayload {
-  domain: string
-  expiration: number
-  owner: `0x${string}`
+  domain: string;
+  expiration: number;
+  owner: `0x${string}`;
 }
 
 /**
@@ -19,21 +20,21 @@ interface SignDomainPayload {
 async function signDomainFetcher(
   url: string,
   // `arg` is the second parameter from the SWR trigger function.
-  {arg}: { arg: SignDomainPayload }
+  { arg }: { arg: SignDomainPayload }
 ) {
   const res = await fetch(url, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(arg),
-  })
+  });
 
   if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}))
-    const message = errorBody?.message || "Error signing domain"
-    throw new Error(message)
+    const errorBody = await res.json().catch(() => ({}));
+    const message = errorBody?.message || "Error signing domain";
+    throw new Error(message);
   }
 
-  return res.json()
+  return res.json();
 }
 
 /**
@@ -42,17 +43,17 @@ async function signDomainFetcher(
  */
 export function useSignDomain() {
   const {
-    trigger,      // function to manually invoke the mutation
-    data,         // holds success response data
-    error,        // holds error object if the request fails
-    isMutating,   // boolean for loading state
-  } = useSWRMutation(backendUrl + "/domain/sign", signDomainFetcher)
+    trigger, // function to manually invoke the mutation
+    data, // holds success response data
+    error, // holds error object if the request fails
+    isMutating, // boolean for loading state
+  } = useSWRMutation(backendUrl + "/domain/sign", signDomainFetcher);
 
   /**
    * Wrap trigger() in a user-friendly function.
    */
   async function signDomain(payload: SignDomainPayload) {
-    return trigger(payload)
+    return trigger(payload);
   }
 
   return {
@@ -60,5 +61,5 @@ export function useSignDomain() {
     data,
     error,
     isMutating,
-  }
+  };
 }
