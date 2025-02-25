@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import ContextProvider from "@/context";
 import { Toaster } from "@/components/ui/sonner";
 
