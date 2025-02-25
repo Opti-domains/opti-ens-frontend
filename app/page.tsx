@@ -99,11 +99,11 @@ export default function HomePage() {
       <div className="relative flex md:h-[600px] w-full flex-col items-center justify-center overflow-hidden rounded-lg  bg-background">
         <section className="z-10 flex flex-col items-center justify-center px-4 py-16 text-center">
           <div className="text-5xl font-bold bg-gradient-to-r from-indigo-400 via-fuchsia-500 to-red-500 bg-clip-text text-transparent drop-shadow-lg">
-            <p>Welcome to Singular Domain</p>
+            <p>Opti.Domains ENS L2</p>
           </div>
 
           <div className="p-6">
-            <p className="max-w-xl text-lg text-gray-700 leading-relaxed">
+            <p className="max-w-xl text-lg text-gray-700 leading-relaxed hidden">
               <span className="font-extrabold text-black">
                 Singular Domain{" "}
               </span>
@@ -130,21 +130,13 @@ export default function HomePage() {
             </p>
 
             <p className="mt-6 max-w-xl text-lg text-gray-700 leading-relaxed">
-              <span className="text-blue-500 font-bold">
-                Connect your wallet
-              </span>{" "}
-              to verify your
+              <span className="text-blue-500 font-bold">Connect wallet</span>{" "}
+              and migrate your
               <span className="text-indigo-500 font-semibold">
                 {" "}
                 ENS domains
               </span>
-              , then
-              <span className="text-purple-500 font-bold"> mint</span> your
-              <span className="text-green-500 font-bold">
-                {" "}
-                1:1 Singular Domains
-              </span>
-              <span className="text-pink-500 font-bold"> absolutely free!</span>
+              <span className="text-red-500 font-bold"> to Optimism</span>
             </p>
           </div>
 

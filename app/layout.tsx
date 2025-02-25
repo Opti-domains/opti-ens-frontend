@@ -18,8 +18,11 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Singular Domain",
-  description: "A decentralized domain registry",
+  title: "Opti.Domains ENS L2 on Optimism",
+  description: "Connect wallet and migrate your ENS domains to Optimism",
+  icons: {
+    icon: "/icons/logo.svg",
+  },
 };
 
 export default function RootLayout({

@@ -17,7 +17,7 @@ export function Header() {
           <div className="h-8 w-8 rounded-full bg-gray-200">
             <Image
               src="/icons/logo.svg"
-              alt="Singular domains logo"
+              alt="Opti.domains logo"
               width="40"
               height="40"
             />

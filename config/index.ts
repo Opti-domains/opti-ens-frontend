@@ -24,8 +24,8 @@ export const localChain: Chain = {
 };
 
 export const config = getDefaultConfig({
-  appName: "Singular Domains",
-  projectId: "b56e18d47c72ab683b10814fe9495694",
+  appName: "Opti Domains",
+  projectId,
   chains:
     process.env.NEXT_PUBLIC_TESTNET === "true" ? [optimismSepolia] : [optimism],
   ssr: true,
