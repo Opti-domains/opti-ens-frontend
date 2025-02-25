@@ -26,15 +26,7 @@ export const localChain: Chain = {
 export const config = getDefaultConfig({
   appName: "Singular Domains",
   projectId: "b56e18d47c72ab683b10814fe9495694",
-  chains: [
-    // mainnet,
-    // polygon,
-    // optimism,
-    // arbitrum,
-    // base,
-    localChain,
-    optimismSepolia,
-    // ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
-  ],
+  chains:
+    process.env.NEXT_PUBLIC_TESTNET === "true" ? [optimismSepolia] : [optimism],
   ssr: true,
 });
