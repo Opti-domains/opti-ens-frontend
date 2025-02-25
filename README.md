@@ -1,4 +1,4 @@
-This is a singular domain that will be used to user claim opt.id domain
+# Opti.Domains ENS L2 on Optimism
 
 ## Getting Started
 
