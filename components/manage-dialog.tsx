@@ -164,7 +164,7 @@ export function ManageDialog({
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setText",
-            args: [dnsEncode(label), "display", toHex(state.display)],
+            args: [dnsEncode(label), "display", state.display],
           })
         );
       }
@@ -173,7 +173,7 @@ export function ManageDialog({
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setText",
-            args: [dnsEncode(label), "description", toHex(state.description)],
+            args: [dnsEncode(label), "description", state.description],
           })
         );
       }
@@ -182,7 +182,7 @@ export function ManageDialog({
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setText",
-            args: [dnsEncode(label), "avatar", toHex(state.avatar)],
+            args: [dnsEncode(label), "avatar", state.avatar],
           })
         );
       }
@@ -191,7 +191,7 @@ export function ManageDialog({
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setText",
-            args: [dnsEncode(label), "email", toHex(state.email)],
+            args: [dnsEncode(label), "email", state.email],
           })
         );
       }
@@ -200,7 +200,7 @@ export function ManageDialog({
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setText",
-            args: [dnsEncode(label), "url", toHex(state.url)],
+            args: [dnsEncode(label), "url", state.url],
           })
         );
       }

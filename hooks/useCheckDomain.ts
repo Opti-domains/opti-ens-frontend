@@ -1,13 +1,21 @@
-"use client"
+"use client";
 
-import useSWRMutation from "swr/mutation"
-import {backendUrl} from "@/hooks/useSignDomain";
+import useSWRMutation from "swr/mutation";
+import { backendUrl } from "@/hooks/useSignDomain";
+import { encodeFunctionData, PublicClient } from "viem";
+import { domainAbi } from "@/lib/abi/domain";
+import { usePublicClient } from "wagmi";
+import { multicallABI } from "@/lib/abi/multical";
 
 /**
  * Type for the payload we send to the API
  */
 interface CheckDomainPayload {
-  domains: string[]
+  domains: string[];
+}
+
+interface CheckDomainPayloadWithClient extends CheckDomainPayload {
+  client: PublicClient;
 }
 
 /**
@@ -16,21 +24,32 @@ interface CheckDomainPayload {
 async function checkDomainFetcher(
   url: string,
   // `arg` is the second parameter from the SWR trigger function.
-  {arg}: { arg: CheckDomainPayload }
+  { arg }: { arg: CheckDomainPayloadWithClient }
 ) {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(arg),
-  })
+  // Create an array of encoded function calls for multicall
+  const calls = arg.domains.map((label) =>
+    encodeFunctionData({
+      abi: domainAbi,
+      functionName: "subdomains",
+      args: [label],
+    })
+  );
 
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}))
-    const message = errorBody?.message || "Error checking domain"
-    throw new Error(message)
-  }
+  const results = (await arg.client.readContract({
+    address: process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS as `0x${string}`,
+    abi: multicallABI,
+    functionName: "multicall",
+    args: [calls],
+  })) as `0x${string}`[];
 
-  return res.json()
+  return results.map((result, i) => ({
+    label: arg.domains[i],
+    status:
+      result ==
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ? "unclaimed"
+        : "claimed",
+  }));
 }
 
 /**
@@ -38,18 +57,20 @@ async function checkDomainFetcher(
  * You can rename "your-api.com" to your actual domain or endpoint.
  */
 export function useCheckDomain() {
+  const publicClient = usePublicClient();
+
   const {
-    trigger,      // function to manually invoke the mutation
-    data,         // holds success response data
-    error,        // holds error object if the request fails
-    isMutating,   // boolean for loading state
-  } = useSWRMutation(backendUrl + "/domain/check", checkDomainFetcher)
+    trigger, // function to manually invoke the mutation
+    data, // holds success response data
+    error, // holds error object if the request fails
+    isMutating, // boolean for loading state
+  } = useSWRMutation(backendUrl + "/domain/check", checkDomainFetcher);
 
   /**
    * Wrap trigger() in a user-friendly function.
    */
   async function checkDomain(payload: CheckDomainPayload) {
-    return trigger(payload)
+    return trigger({ ...payload, client: publicClient as PublicClient });
   }
 
   return {
@@ -57,5 +78,5 @@ export function useCheckDomain() {
     data,
     error,
     isMutating,
-  }
+  };
 }
