@@ -8,8 +8,41 @@ import {Input} from "@/components/ui/input";
 import {PlusIcon} from "lucide-react";
 import DomainTable from "@/components/domain-table";
 import Subnames from "@/components/subnames";
+import {useReadContract} from "wagmi";
+import {domainAddress} from "@/components/domain-list";
 
-export default function Contact() {
+type Props = {
+  params: { label: string };
+};
+
+const ROOT_DOMAIN_ABI = [
+  {
+    type: "function",
+    name: "resolver",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+];
+
+export default function DomainDetails({ params }: Props) {
+  const { label } = params;
+  console.log(label);
+
+  const { data: resolver } = useReadContract({
+    address: domainAddress,
+    abi: ROOT_DOMAIN_ABI,
+    functionName: "resolver",
+    args: [],
+  });
+
+  console.log(resolver);
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
       <Tabs defaultValue="account" className="md:w-[700px]">
@@ -68,8 +101,7 @@ export default function Contact() {
           </Card>
         </TabsContent>
         <TabsContent value="subnames">
-          <div>halo</div>
-          {/*<Subnames />*/}
+          <Subnames parentDomain={label} resolver={resolver as `0x${string}`} />
         </TabsContent>
       </Tabs>
     </div>

@@ -22,7 +22,7 @@ export function Header() {
               height="40"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 className="md:text-2xl font-bold text-gray-900 tracking-tight text-base">
             Opti.Domains <span className="text-blue-600">ENS L2</span>
           </h1>
         </div>
