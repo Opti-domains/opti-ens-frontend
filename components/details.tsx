@@ -12,6 +12,7 @@ import {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import Socials from "@/components/socials";
 import Addresses from "@/components/addresses";
+import Profile from "@/components/profile";
 
 const ROOT_DOMAIN_ABI = [
   {
@@ -61,27 +62,7 @@ export default function DomainDetails({ label }: { label: string }) {
                        className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Subnames</TabsTrigger>
         </TabsList>
         <TabsContent value="account">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account</CardTitle>
-              <CardDescription>
-                Make changes to your account here. Click save when you're done.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" defaultValue="Pedro Duarte"/>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="username">Username</Label>
-                <Input id="username" defaultValue="@peduarte"/>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save changes</Button>
-            </CardFooter>
-          </Card>
+          <Profile parentDomain={label} resolverAddress={resolver as `0x${string}`}/>
         </TabsContent>
         <TabsContent value="addresses">
           <Addresses

@@ -8,26 +8,19 @@ import { useEffect, useState } from "react";
 import { multicallABI } from "@/lib/abi/multical";
 
 export function useOtherInfo(
-  activeTab: string,
   label: string,
   resolverAddress: `0x${string}`
 ) {
-  const [dataDecoded, setDataDecoded] = useState({
+  const [profileDecoded, setProfileDecoded] = useState({
     contenthash: "",
     display: "",
     description: "",
     avatar: "",
     email: "",
-    url: "",
   });
   const [callOther, setCallOther] = useState<`0x${string}`[]>([]);
 
   useEffect(() => {
-    if (activeTab !== "general") {
-      setCallOther([]);
-      return;
-    }
-
     setCallOther([
       encodeFunctionData({
         abi: resolverABI,
@@ -54,13 +47,8 @@ export function useOtherInfo(
         functionName: "text",
         args: [dnsEncode(label), "email"],
       }),
-      encodeFunctionData({
-        abi: resolverABI,
-        functionName: "text",
-        args: [dnsEncode(label), "url"],
-      }),
     ]);
-  }, [activeTab, label]);
+  }, [label]);
 
   const { data, isSuccess, refetch } = useReadContract({
     address: resolverAddress,
@@ -73,7 +61,7 @@ export function useOtherInfo(
   useEffect(() => {
     if (isSuccess && data) {
       const results = data as `0x${string}`[];
-      if (results.length >= 6) {
+      if (results.length >= 5) {
         const hexContentHash = decodeFunctionResult({
           abi: resolverABI,
           functionName: "contenthash",
@@ -105,23 +93,16 @@ export function useOtherInfo(
           data: results[4],
         }) as string;
 
-        const url = decodeFunctionResult({
-          abi: resolverABI,
-          functionName: "text",
-          data: results[5],
-        }) as string;
-
-        setDataDecoded({
+        setProfileDecoded({
           contenthash: contentHash,
           display: display,
           description: description,
           avatar: avatar,
           email: email,
-          url: url,
         });
       }
     }
   }, [isSuccess, data]);
 
-  return { dataDecoded, isUpdate: isSuccess, refetchOther: refetch };
+  return { profileDecoded, isUpdate: isSuccess, refetchProfile: refetch };
 }

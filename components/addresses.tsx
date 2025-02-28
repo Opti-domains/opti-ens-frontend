@@ -103,7 +103,7 @@ export default function Addresses({ parentDomain, resolverAddress }: Props) {
     <Card className="bg-gray-50 p-2">
       <CardHeader>
         <CardDescription>
-          <span className="text-base font-bold italic">Enter your social media handles for easy connectivity and verification.</span>
+          <span className="text-base font-bold italic">Enter your address will be map with your ENS.</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-1">
@@ -114,7 +114,7 @@ export default function Addresses({ parentDomain, resolverAddress }: Props) {
             </Label>
             <div className="relative w-full">
               <Input
-                className="text-gray-500 bg-white hover:bg-gray-200"
+                className="text-gray-500 bg-white hover:bg-blue-50"
                 value={record.address}
                 disabled={!isEditing}
                 onChange={(e) => handleUpdateValue(index, e.target.value)}
@@ -132,7 +132,7 @@ export default function Addresses({ parentDomain, resolverAddress }: Props) {
         ))}
       </CardContent>
       <CardFooter>
-        <Button className="md:min-w-48 min-w-36" onClick={handleEdit}>
+        <Button className="md:min-w-48 min-w-36 font-bold" onClick={handleEdit}>
           {isEditing ? (isConfirming ?
             <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Save Changes") : "Edit Addresses"}
         </Button>

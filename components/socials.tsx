@@ -118,7 +118,7 @@ export default function Socials({ parentDomain, resolverAddress }: Props) {
           </Label>
         <div className="relative w-full">
           <Input
-            className="text-gray-500 bg-white hover:bg-gray-200"
+            className="text-gray-500 bg-white hover:bg-blue-50"
             value={record.value}
             disabled={!isEditing}
             onChange={(e) => handleUpdateValue(index, e.target.value)}
@@ -136,7 +136,7 @@ export default function Socials({ parentDomain, resolverAddress }: Props) {
       ))}
       </CardContent>
       <CardFooter>
-        <Button className="md:min-w-48 min-w-36" onClick={handleEdit}>
+        <Button className="md:min-w-48 min-w-36 font-bold" onClick={handleEdit}>
           {isEditing ? (isConfirming ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/>  : "Save Changes") : "Edit Socials"}
         </Button>
       </CardFooter>
