@@ -5,10 +5,46 @@ import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} f
 import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
-import {PlusIcon} from "lucide-react";
-import DomainTable from "@/components/domain-table";
+import SubNames from "@/components/subNames";
+import {useAccount, useReadContract} from "wagmi";
+import {domainAddress} from "@/components/domain-list";
+import {useEffect} from "react";
+import {useRouter} from "next/navigation";
 
-export default function Contact() {
+const ROOT_DOMAIN_ABI = [
+  {
+    type: "function",
+    name: "resolver",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+];
+
+export default function DomainDetails({ label }: { label: string }) {
+  const {address, isConnected} = useAccount();
+  const route = useRouter();
+  console.log(label);
+
+  const { data: resolver } = useReadContract({
+    address: domainAddress,
+    abi: ROOT_DOMAIN_ABI,
+    functionName: "resolver",
+    args: [],
+  });
+
+  console.log(resolver);
+  useEffect(() => {
+    if (!isConnected) {
+      route.push("/");
+    }
+  }, [isConnected]);
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
       <Tabs defaultValue="account" className="md:w-[700px]">
@@ -67,10 +103,12 @@ export default function Contact() {
           </Card>
         </TabsContent>
         <TabsContent value="subnames">
-          <div>halo</div>
-          {/*<Subnames />*/}
+          <SubNames
+            parentDomain={label}
+            owner={address as `0x${string}`}
+          />
         </TabsContent>
       </Tabs>
     </div>
-)
+  )
 }

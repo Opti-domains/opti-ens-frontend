@@ -28,7 +28,7 @@ export const config = getDefaultConfig({
   projectId,
   chains:[
     localChain,
-    process.env.NEXT_PUBLIC_TESTNET === "true" ? optimismSepolia : optimism,
+    // process.env.NEXT_PUBLIC_TESTNET === "true" ? optimismSepolia : optimism,
   ],
   ssr: true,
 });

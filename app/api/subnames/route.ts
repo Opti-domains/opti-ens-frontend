@@ -1,67 +1,21 @@
 // import {NextRequest, NextResponse} from "next/server";
+// import {toBytes, concat} from "viem";
 //
-// const DOMAIN_IMPL_ABI=[
-//   {
-//     "type": "function",
-//     "name": "getNestedAddress",
-//     "inputs": [
-//       {
-//         "name": "reverseDnsEncoded",
-//         "type": "bytes",
-//         "internalType": "bytes"
-//       }
-//     ],
-//     "outputs": [
-//       {
-//         "name": "",
-//         "type": "address",
-//         "internalType": "address"
-//       }
-//     ],
-//     "stateMutability": "view"
-//   },
-//   {
-//     "type": "function",
-//     "name": "getSubdomainNames",
-//     "inputs": [
-//       {
-//         "name": "start",
-//         "type": "uint256",
-//         "internalType": "uint256"
-//       },
-//       {
-//         "name": "length",
-//         "type": "uint256",
-//         "internalType": "uint256"
-//       }
-//     ],
-//     "outputs": [
-//       {
-//         "name": "",
-//         "type": "string[]",
-//         "internalType": "string[]"
-//       }
-//     ],
-//     "stateMutability": "view"
-//   },
-//   {
-//     "type": "function",
-//     "name": "getSubdomainCount",
-//     "inputs": [],
-//     "outputs": [
-//       {
-//         "name": "",
-//         "type": "uint256",
-//         "internalType": "uint256"
-//       }
-//     ],
-//     "stateMutability": "view"
-//   }
-// ]
+// function encodeDns(labels: string[]): Uint8Array {
+//   const encodedLabels = labels.map(label => {
+//     const labelBytes = toBytes(label);
+//     return concat([Uint8Array.of(labelBytes.length), labelBytes]);
+//   });
+//
+//   return concat([...encodedLabels, Uint8Array.of(0)]); // Append null byte at the end
+// }
 //
 // async function fetchSubNames(domain: string) {
 //   const labels = domain.split(".")
-//   labels.forEach()
+//   const encodedDns = encodeDns(labels)
+//
+//   // Fetch the subdomains from the ENS registry
+//
 // }
 //
 // export async function GET(request: NextRequest) {

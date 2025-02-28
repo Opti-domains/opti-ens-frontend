@@ -11,19 +11,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSignDomain } from "@/hooks/useSignDomain";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import {
   useWaitForTransactionReceipt,
   useWriteContract,
   type BaseError,
-  useReadContract,
 } from "wagmi";
 import { registryAbi } from "@/lib/abi/registry";
 import { padHex, toHex } from "viem";
-import { ManageDialog } from "@/components/manage-dialog";
 import {useRouter} from "next/navigation";
 
-const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
+export const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
 export const domainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS ||
   "0x") as `0x${string}`;
 
@@ -53,10 +51,6 @@ export function DomainList({
   const router = useRouter();
   const { signDomain, data, error: signErr, isMutating } = useSignDomain();
   const { data: hash, error, writeContract } = useWriteContract();
-  // const label = useRef<string>("");
-  // const owner = useRef<string>("");
-  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
-  const [open, setOpen] = useState(false);
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
@@ -83,11 +77,6 @@ export function DomainList({
     },
     [signDomain]
   );
-
-  const handleManage = useCallback((domain: Domain) => {
-    setSelectedDomain(domain);
-    setOpen(true);
-  }, []);
 
   useEffect(() => {
     if (isMutating) {

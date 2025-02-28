@@ -5,8 +5,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import {
@@ -18,40 +16,14 @@ import {
 import { ChevronDown, Filter, ArrowDownUp } from "lucide-react";
 import {Label} from "@/components/ui/label";
 
-const domains = [
-  {
-    name: "game",
-    fullDomain: "game.ez42.eth",
-    icon: "bg-gradient-to-r from-red-500 to-orange-500",
-    action: "Manager",
-  },
-  {
-    name: "blog",
-    fullDomain: "blog.ez42.eth",
-    icon: "bg-gradient-to-r from-blue-500 to-green-500",
-    action: "Manager",
-  },
-  {
-    name: "shop",
-    fullDomain: "shop.ez42.eth",
-    icon: "bg-gradient-to-r from-purple-500 to-pink-500",
-    action: "Manager",
-  },
-  {
-    name: "docs",
-    fullDomain: "docs.ez42.eth",
-    icon: "bg-gradient-to-r from-yellow-500 to-red-500",
-    action: "Manager",
-  },
-  {
-    name: "api",
-    fullDomain: "api.ez42.eth",
-    icon: "bg-gradient-to-r from-gray-500 to-black",
-    action: "Manager",
-  },
-];
+export type DomainTableType = {
+  name: string;
+  fullDomain: string;
+  icon: string;
+  action: string;
+}
 
-export default function DomainTable() {
+export default function DomainTable({ domains }: { domains: DomainTableType[] }) {
   const [search, setSearch] = useState("");
 
   const filteredDomains = domains.filter((d) =>

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { concat, toHex } from "viem";
+import {concat, toBytes, toHex} from "viem";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,4 +28,13 @@ export function dnsEncode(name: string) {
   const emptyLabel = toHex(0, { size: 1 });
 
   return concat([...encodedLabels, emptyLabel]);
+}
+
+export function encodeDns(labels: string[]): Uint8Array {
+  const encodedLabels = labels.map(label => {
+    const labelBytes = toBytes(label);
+    return concat([Uint8Array.of(labelBytes.length), labelBytes]);
+  });
+
+  return concat([...encodedLabels, Uint8Array.of(0)]); // Append null byte at the end
 }
