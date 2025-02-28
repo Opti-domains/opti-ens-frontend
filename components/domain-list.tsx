@@ -22,7 +22,7 @@ import { padHex, toHex } from "viem";
 import {useRouter} from "next/navigation";
 
 export const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
-export const domainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS ||
+export const rootDomainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS ||
   "0x") as `0x${string}`;
 
 /**
@@ -88,7 +88,7 @@ export function DomainList({
       const byte32Value = padHex(toHex(Number(data.nonce)), { size: 32 });
 
       console.log([
-        domainAddress,
+        rootDomainAddress,
         data.domain,
         data.owner,
         BigInt(data.deadline).valueOf(),
@@ -101,7 +101,7 @@ export function DomainList({
         abi: registryAbi,
         functionName: "register",
         args: [
-          domainAddress,
+          rootDomainAddress,
           data.domain,
           data.owner,
           BigInt(data.deadline).valueOf(),

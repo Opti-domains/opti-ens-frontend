@@ -7,9 +7,10 @@ import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import SubNames from "@/components/subNames";
 import {useAccount, useReadContract} from "wagmi";
-import {domainAddress} from "@/components/domain-list";
+import {rootDomainAddress} from "@/components/domain-list";
 import {useEffect} from "react";
 import {useRouter} from "next/navigation";
+import Socials from "@/components/socials";
 
 const ROOT_DOMAIN_ABI = [
   {
@@ -32,8 +33,10 @@ export default function DomainDetails({ label }: { label: string }) {
   const route = useRouter();
   console.log(label);
 
+  // const resolver = "0x86c9bCe44c522eC855310D7a7eeB58e72cA5755E";
+
   const { data: resolver } = useReadContract({
-    address: domainAddress,
+    address: rootDomainAddress,
     abi: ROOT_DOMAIN_ABI,
     functionName: "resolver",
     args: [],
@@ -50,9 +53,9 @@ export default function DomainDetails({ label }: { label: string }) {
       <Tabs defaultValue="account" className="md:w-[700px]">
         <TabsList className="flex flex-row items-start justify-start mb-4 bg-white">
           <TabsTrigger value="account"
-                       className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Account</TabsTrigger>
-          <TabsTrigger value="records"
-                       className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Records</TabsTrigger>
+                       className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Profile</TabsTrigger>
+          <TabsTrigger value="socials"
+                       className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Socials</TabsTrigger>
           <TabsTrigger value="subnames"
                        className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Subnames</TabsTrigger>
         </TabsList>
@@ -79,28 +82,11 @@ export default function DomainDetails({ label }: { label: string }) {
             </CardFooter>
           </Card>
         </TabsContent>
-        <TabsContent value="records">
-          <Card>
-            <CardHeader>
-              <CardTitle>Password</CardTitle>
-              <CardDescription>
-                Change your password here. After saving, you'll be logged out.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="current">Current password</Label>
-                <Input id="current" type="password"/>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new">New password</Label>
-                <Input id="new" type="password"/>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save password</Button>
-            </CardFooter>
-          </Card>
+        <TabsContent value="socials">
+          <Socials
+            parentDomain={label}
+            resolverAddress={resolver as `0x${string}`}
+          />
         </TabsContent>
         <TabsContent value="subnames">
           <SubNames

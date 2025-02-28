@@ -82,7 +82,6 @@ export function ManageDialog({
     resolverAddress
   );
   const { textDecoded, refetchText } = useTextInfo(
-    activeTab,
     label,
     resolverAddress
   );
