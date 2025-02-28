@@ -57,7 +57,7 @@ export function useTextInfo(
             functionName: "text",
             data: res,
           }) as string;
-          console.log("value", value);
+
           return {
             label: initialSocials[i].label,
             key: initialSocials[i].key,

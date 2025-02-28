@@ -3,55 +3,52 @@
 import {Card, CardContent, CardDescription, CardFooter, CardHeader} from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
-import {useCallback, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {initialSocials, useTextInfo} from "@/hooks/useTextInfo";
-import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
-import {encodeFunctionData} from "viem";
+import {Copy, Loader2} from "lucide-react";
+import {useCallback, useEffect, useState} from "react";
+import {initialAddress, useAddressInfo} from "@/hooks/useAddressInfo";
+import {encodeFunctionData, toBytes, toHex} from "viem";
 import {resolverABI} from "@/lib/abi/resolver";
 import {dnsEncode} from "@/lib/utils";
-import {Copy, Loader2} from "lucide-react";
 import {toast} from "sonner";
+import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
 
 type Props = {
   parentDomain: string
   resolverAddress: `0x${string}`;
 }
 
-export default function Socials({ parentDomain, resolverAddress }: Props) {
-  // State
-  const [state, setState] = useState({ records: initialSocials });
+export default function Addresses({ parentDomain, resolverAddress }: Props) {
+  const [state, setState] = useState({ records: initialAddress });
   const [isEditing, setIsEditing] = useState(false);
 
-
-  // Hooks
-  const {textDecoded, refetchText} = useTextInfo(parentDomain,resolverAddress);
+  const {addressDecoded, refetchAddress} = useAddressInfo(parentDomain,resolverAddress);
   const { data: hash, error: writeErr, writeContract } = useWriteContract();
   const { isError, error: txError, isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
-  // Handlers
   const handleUpdateValue = useCallback((index: number, value: string) => {
     setState((prev) => {
       const updated = [...prev.records];
-      updated[index].value = value;
+      updated[index].address = value;
       return { ...prev, records: updated };
     });
   }, []);
 
   const handleEdit = () => {
     if (!isEditing) {
-      // change to edit mode
       setIsEditing(true);
     }else {
       // save changes
+      console.log("state", state);
+      console.log("addr", toHex(toBytes(state.records[0].address)));
       const calls: `0x${string}`[] = [];
       calls.push(
         ...state.records.map((record) =>
           encodeFunctionData({
             abi: resolverABI,
-            functionName: "setText",
-            args: [dnsEncode(parentDomain), record.key, record.value],
+            functionName: "setAddr",
+            args: [dnsEncode(parentDomain), BigInt(record.coinType), toHex(toBytes(record.address))],
           })
         )
       );
@@ -73,10 +70,10 @@ export default function Socials({ parentDomain, resolverAddress }: Props) {
   };
 
   useEffect(() => {
-    if (textDecoded) {
-      setState({records: textDecoded});
+    if (addressDecoded) {
+      setState({records: addressDecoded});
     }
-  }, [textDecoded]);
+  }, [addressDecoded]);
 
   useEffect(() => {
     if (writeErr) {
@@ -91,17 +88,16 @@ export default function Socials({ parentDomain, resolverAddress }: Props) {
     }
 
     if (isConfirmed) {
-      refetchText();
+      refetchAddress();
       setIsEditing(false);
-      toast.success("Socials updated successfully!");
+      toast.success("Addresses updated successfully!");
     }
   }, [
     isError,
     writeErr,
     isConfirmed,
-    refetchText,
+    refetchAddress,
   ]);
-
 
   return (
     <Card className="bg-gray-50 p-2">
@@ -111,35 +107,36 @@ export default function Socials({ parentDomain, resolverAddress }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-1">
-      {state.records.map((record, index) => (
-        <div key={index} className="flex flex-col mb-2 space-x-2">
-          <Label className="text-sm font-bold text-gray-500 mb-2">
-            {record.label}
-          </Label>
-        <div className="relative w-full">
-          <Input
-            className="text-gray-500 bg-white hover:bg-gray-200"
-            value={record.value}
-            disabled={!isEditing}
-            onChange={(e) => handleUpdateValue(index, e.target.value)}
-          />
-          <Button
-            className="absolute inset-y-0 right-0"
-            variant="ghost"
-            onClick={() => handleCopy(record.value)}
-          >
-            <Copy className="w-5 h-5 text-gray-500" />
-          </Button>
+        {state.records.map((record, index) => (
+          <div key={index} className="flex flex-col mb-2 space-x-2">
+            <Label className="text-sm font-bold text-gray-500 mb-2">
+              {record.icon}
+            </Label>
+            <div className="relative w-full">
+              <Input
+                className="text-gray-500 bg-white hover:bg-gray-200"
+                value={record.address}
+                disabled={!isEditing}
+                onChange={(e) => handleUpdateValue(index, e.target.value)}
+              />
+              <Button
+                className="absolute inset-y-0 right-0"
+                variant="ghost"
+                onClick={() => handleCopy(record.address)}
+              >
+                <Copy className="w-5 h-5 text-gray-500" />
+              </Button>
 
-        </div>
-        </div>
-      ))}
+            </div>
+          </div>
+        ))}
       </CardContent>
       <CardFooter>
         <Button className="md:min-w-48 min-w-36" onClick={handleEdit}>
-          {isEditing ? (isConfirming ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/>  : "Save Changes") : "Edit Socials"}
+          {isEditing ? (isConfirming ?
+            <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Save Changes") : "Edit Addresses"}
         </Button>
       </CardFooter>
     </Card>
-  );
+  )
 }

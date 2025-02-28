@@ -11,6 +11,7 @@ import {rootDomainAddress} from "@/components/domain-list";
 import {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import Socials from "@/components/socials";
+import Addresses from "@/components/addresses";
 
 const ROOT_DOMAIN_ABI = [
   {
@@ -33,8 +34,6 @@ export default function DomainDetails({ label }: { label: string }) {
   const route = useRouter();
   console.log(label);
 
-  // const resolver = "0x86c9bCe44c522eC855310D7a7eeB58e72cA5755E";
-
   const { data: resolver } = useReadContract({
     address: rootDomainAddress,
     abi: ROOT_DOMAIN_ABI,
@@ -54,6 +53,8 @@ export default function DomainDetails({ label }: { label: string }) {
         <TabsList className="flex flex-row items-start justify-start mb-4 bg-white">
           <TabsTrigger value="account"
                        className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Profile</TabsTrigger>
+          <TabsTrigger value="addresses"
+                       className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Addresses</TabsTrigger>
           <TabsTrigger value="socials"
                        className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none">Socials</TabsTrigger>
           <TabsTrigger value="subnames"
@@ -81,6 +82,12 @@ export default function DomainDetails({ label }: { label: string }) {
               <Button>Save changes</Button>
             </CardFooter>
           </Card>
+        </TabsContent>
+        <TabsContent value="addresses">
+          <Addresses
+            parentDomain={label}
+            resolverAddress={resolver as `0x${string}`}
+          />
         </TabsContent>
         <TabsContent value="socials">
           <Socials
