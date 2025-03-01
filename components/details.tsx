@@ -1,10 +1,6 @@
 "use client";
 
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Label} from "@/components/ui/label";
-import {Input} from "@/components/ui/input";
 import SubNames from "@/components/subNames";
 import {useAccount, useReadContract} from "wagmi";
 import {rootDomainAddress} from "@/components/domain-list";

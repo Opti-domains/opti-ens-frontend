@@ -1,10 +1,6 @@
 import DomainDetails from "@/components/details";
 
-type Props = {
-  params: { label: string };
-};
-
-export default async function DomainDetailPage({params}: Props) {
-  const {label} = await params;
+export default async function DomainDetailPage({params}: { params: Promise<{label: string}>; }) {
+  const label = (await params).label;
   return <DomainDetails label={label}/>
 }
