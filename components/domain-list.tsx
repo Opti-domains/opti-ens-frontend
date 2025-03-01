@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSignDomain } from "@/hooks/useSignDomain";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -19,11 +19,11 @@ import {
 } from "wagmi";
 import { registryAbi } from "@/lib/abi/registry";
 import { padHex, toHex } from "viem";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
-export const rootDomainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS ||
-  "0x") as `0x${string}`;
+export const rootDomainAddress = (process.env
+  .NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x") as `0x${string}`;
 
 /**
  * Type definition for domain items
@@ -56,6 +56,8 @@ export function DomainList({
       hash,
     });
 
+  const [isClaiming, setIsClaiming] = useState(false);
+
   const handleClaim = useCallback(
     async (domain: Domain) => {
       if (!domain.expiration || domain.expiration === "--") {
@@ -81,6 +83,7 @@ export function DomainList({
   useEffect(() => {
     if (isMutating) {
       toast.loading("Claiming domain...");
+      setIsClaiming(true);
     } else if (signErr) {
       toast.dismiss();
       toast.error("Claim failed", { description: signErr.message });
@@ -118,6 +121,7 @@ export function DomainList({
       toast.error("Claim failed", {
         description: (error as BaseError).shortMessage || error.message,
       });
+      setIsClaiming(false);
     }
     if (isConfirming) {
       toast.loading("Confirming transaction...");
@@ -125,9 +129,11 @@ export function DomainList({
     if (isConfirmed) {
       toast.dismiss();
       toast.success("Domain claimed successfully!");
-      fetchData();
+      // fetchData();
+
+      router.push(`/${data.domain}.eth`);
     }
-  }, [error, isConfirming, isConfirmed, fetchData]);
+  }, [error, isConfirming, isConfirmed, data, fetchData]);
 
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
@@ -157,11 +163,25 @@ export function DomainList({
                 <TableCell>{d.expiration || "--"}</TableCell>
                 <TableCell className="text-right">
                   {d.action === "Claim" ? (
-                    <Button variant="default" onClick={() => handleClaim(d)}>
+                    <Button
+                      variant="default"
+                      onClick={() => handleClaim(d)}
+                      disabled={isClaiming}
+                      style={{
+                        opacity: isClaiming ? 0.5 : 1,
+                      }}
+                    >
                       {d.action}
                     </Button>
                   ) : (
-                    <Button variant="default" onClick={() => router.push(`/${d.name}`)}>
+                    <Button
+                      variant="default"
+                      onClick={() => router.push(`/${d.name}`)}
+                      disabled={isClaiming}
+                      style={{
+                        opacity: isClaiming ? 0.5 : 1,
+                      }}
+                    >
                       {d.action || "Manage"}
                     </Button>
                   )}

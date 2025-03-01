@@ -6,6 +6,7 @@ import { encodeFunctionData, PublicClient } from "viem";
 import { domainAbi } from "@/lib/abi/domain";
 import { usePublicClient } from "wagmi";
 import { multicallABI } from "@/lib/abi/multical";
+import { optimismChain } from "@/config";
 
 /**
  * Type for the payload we send to the API
@@ -57,7 +58,7 @@ async function checkDomainFetcher(
  * You can rename "your-api.com" to your actual domain or endpoint.
  */
 export function useCheckDomain() {
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId: optimismChain.id });
 
   const {
     trigger, // function to manually invoke the mutation
