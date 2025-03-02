@@ -16,15 +16,14 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
   type BaseError,
-  useReadContract,
 } from "wagmi";
 import { registryAbi } from "@/lib/abi/registry";
 import { padHex, toHex } from "viem";
-import { ManageDialog } from "@/components/manage-dialog";
+import { useRouter } from "next/navigation";
 
-const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
-const domainAddress = (process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS ||
-  "0x") as `0x${string}`;
+export const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x";
+export const rootDomainAddress = (process.env
+  .NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS || "0x") as `0x${string}`;
 
 /**
  * Type definition for domain items
@@ -36,22 +35,6 @@ export interface Domain {
   expiration?: string;
   action?: string;
 }
-
-const ROOT_DOMAIN_ABI = [
-  {
-    type: "function",
-    name: "resolver",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    stateMutability: "view",
-  },
-];
 
 /**
  * DomainList component
@@ -65,23 +48,15 @@ export function DomainList({
   domains: Domain[];
   fetchData: () => void;
 }) {
+  const router = useRouter();
   const { signDomain, data, error: signErr, isMutating } = useSignDomain();
   const { data: hash, error, writeContract } = useWriteContract();
-  // const label = useRef<string>("");
-  // const owner = useRef<string>("");
-  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
-  const [open, setOpen] = useState(false);
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
     });
 
-  const { data: resolver } = useReadContract({
-    address: domainAddress,
-    abi: ROOT_DOMAIN_ABI,
-    functionName: "resolver",
-    args: [],
-  });
+  const [isClaiming, setIsClaiming] = useState(false);
 
   const handleClaim = useCallback(
     async (domain: Domain) => {
@@ -105,14 +80,10 @@ export function DomainList({
     [signDomain]
   );
 
-  const handleManage = useCallback((domain: Domain) => {
-    setSelectedDomain(domain);
-    setOpen(true);
-  }, []);
-
   useEffect(() => {
     if (isMutating) {
       toast.loading("Claiming domain...");
+      setIsClaiming(true);
     } else if (signErr) {
       toast.dismiss();
       toast.error("Claim failed", { description: signErr.message });
@@ -120,7 +91,7 @@ export function DomainList({
       const byte32Value = padHex(toHex(Number(data.nonce)), { size: 32 });
 
       console.log([
-        domainAddress,
+        rootDomainAddress,
         data.domain,
         data.owner,
         BigInt(data.deadline).valueOf(),
@@ -133,7 +104,7 @@ export function DomainList({
         abi: registryAbi,
         functionName: "register",
         args: [
-          domainAddress,
+          rootDomainAddress,
           data.domain,
           data.owner,
           BigInt(data.deadline).valueOf(),
@@ -150,6 +121,7 @@ export function DomainList({
       toast.error("Claim failed", {
         description: (error as BaseError).shortMessage || error.message,
       });
+      setIsClaiming(false);
     }
     if (isConfirming) {
       toast.loading("Confirming transaction...");
@@ -157,93 +129,11 @@ export function DomainList({
     if (isConfirmed) {
       toast.dismiss();
       toast.success("Domain claimed successfully!");
-      fetchData();
+      // fetchData();
+
+      router.push(`/${data.domain}.eth`);
     }
-  }, [error, isConfirming, isConfirmed, fetchData]);
-
-  // const handleClaim = async (domain: Domain) => {
-  //   try {
-  //     if (!domain.expiration || domain.expiration === "--") {
-  //       toast.error("Claim domain failed", {
-  //         description: "Domain " + domain.name + " has no expiration date",
-  //       });
-  //       return;
-  //     }
-  //     const name = domain.name.split(".")[0];
-  //     label.current = name;
-  //     owner.current = domain.owner;
-  //     await signDomain({
-  //       domain: name,
-  //       expiration: Date.parse(domain.expiration),
-  //       owner: domain.owner,
-  //     });
-  //   } catch (err) {
-  //     console.error("Error claiming domain:", err);
-  //   }
-  // };
-  // const handleManage = (domain: Domain) => {
-  //   // fetch the resolver
-  //   selectedDomain.current = domain;
-  //   setOpen(!open);
-  //   console.log("handle domain:", domain);
-  //   console.log("handle resolver:", resolver);
-  // };
-
-  // useEffect(() => {
-  //   try {
-  //     if (isMutating) {
-  //       toast.loading("Claiming domain...");
-  //     } else if (signErr) {
-  //       toast.dismiss();
-  //       toast.error("Claim domain failed", {
-  //         description: signErr.message,
-  //       });
-  //     } else if (data) {
-  //       console.log(data);
-  //       const hexValue = toHex(Number(data.nonce));
-  //       const byte32Value = padHex(hexValue, { size: 32 });
-  //       writeContract({
-  //         address: registryAddress as `0x${string}`,
-  //         abi: registryAbi,
-  //         functionName: "register",
-  //         args: [
-  //           domainAddress,
-  //           label.current,
-  //           owner.current,
-  //           BigInt(data.deadline).valueOf(),
-  //           byte32Value,
-  //           data.signature,
-  //         ],
-  //       });
-  //     }
-  //   } catch (err) {
-  //     console.error("Error claiming domain:", err);
-  //   }
-  // }, [isMutating, signErr, data]);
-  //
-  // useEffect(() => {
-  //   if (error) {
-  //     toast.dismiss();
-  //     toast.error("Claimed domain failed", {
-  //       description: (error as BaseError).shortMessage || error.message,
-  //     });
-  //   }
-  //   if (isConfirming) {
-  //     toast.dismiss();
-  //     toast.loading("Confirming domain claim: " + hash);
-  //   }
-  //   if (isConfirmed) {
-  //     toast.dismiss();
-  //     toast.success("Claimed domain success with hash: " + hash);
-  //     fetchData();
-  //   }
-  // }, [error, isConfirming, isConfirmed, hash]);
-  //
-  // useEffect(() => {
-  //   if(!open){
-  //     selectedDomain = {} as Domain;
-  //   }
-  // }, [open]);
+  }, [error, isConfirming, isConfirmed, data, fetchData]);
 
   return (
     <div className="mt-8 rounded-lg border bg-white p-4 shadow-sm">
@@ -273,11 +163,25 @@ export function DomainList({
                 <TableCell>{d.expiration || "--"}</TableCell>
                 <TableCell className="text-right">
                   {d.action === "Claim" ? (
-                    <Button variant="default" onClick={() => handleClaim(d)}>
+                    <Button
+                      variant="default"
+                      onClick={() => handleClaim(d)}
+                      disabled={isClaiming}
+                      style={{
+                        opacity: isClaiming ? 0.5 : 1,
+                      }}
+                    >
                       {d.action}
                     </Button>
                   ) : (
-                    <Button variant="default" onClick={() => handleManage(d)}>
+                    <Button
+                      variant="default"
+                      onClick={() => router.push(`/${d.name}`)}
+                      disabled={isClaiming}
+                      style={{
+                        opacity: isClaiming ? 0.5 : 1,
+                      }}
+                    >
                       {d.action || "Manage"}
                     </Button>
                   )}
@@ -288,14 +192,14 @@ export function DomainList({
         </TableBody>
       </Table>
 
-      {open && selectedDomain && (
-        <ManageDialog
-          open={open}
-          setOpen={setOpen}
-          domain={selectedDomain}
-          resolverAddress={resolver as `0x${string}`}
-        />
-      )}
+      {/*{open && selectedDomain && (*/}
+      {/*  <ManageDialog*/}
+      {/*    open={open}*/}
+      {/*    setOpen={setOpen}*/}
+      {/*    domain={selectedDomain}*/}
+      {/*    resolverAddress={resolver as `0x${string}`}*/}
+      {/*  />*/}
+      {/*)}*/}
     </div>
   );
 }

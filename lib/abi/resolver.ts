@@ -1,373 +1,399 @@
 export const resolverABI = [
   {
-    inputs: [
+    "type": "constructor",
+    "inputs": [
       {
-        internalType: "address",
-        name: "_root",
-        type: "address",
-      },
+        "name": "_root",
+        "type": "address",
+        "internalType": "address"
+      }
     ],
-    stateMutability: "nonpayable",
-    type: "constructor",
+    "stateMutability": "nonpayable"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "addr",
+    "inputs": [
       {
-        internalType: "address",
-        name: "target",
-        type: "address",
-      },
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
     ],
-    type: "error",
-    name: "AddressEmptyCode",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address payable"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    inputs: [],
-    type: "error",
-    name: "FailedCall",
+    "type": "function",
+    "name": "addr",
+    "inputs": [
+      {
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "coinType",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    inputs: [],
-    type: "error",
-    name: "InvalidDomain",
+    "type": "function",
+    "name": "contenthash",
+    "inputs": [
+      {
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    inputs: [],
-    type: "error",
-    name: "NotAuthorized",
+    "type": "function",
+    "name": "data",
+    "inputs": [
+      {
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "key",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "multicall",
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-        indexed: true,
-      },
-      {
-        internalType: "address",
-        name: "addr",
-        type: "address",
-        indexed: false,
-      },
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
     ],
-    type: "event",
-    name: "AddrChanged",
-    anonymous: false,
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "root",
+    "inputs": [],
+    "outputs": [
       {
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-        indexed: true,
-      },
-      {
-        internalType: "bytes",
-        name: "contenthash",
-        type: "bytes",
-        indexed: false,
-      },
+        "name": "",
+        "type": "address",
+        "internalType": "contract IDomain"
+      }
     ],
-    type: "event",
-    name: "ContenthashChanged",
-    anonymous: false,
+    "stateMutability": "view"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "setAddr",
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-        indexed: true,
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
       },
       {
-        internalType: "bytes",
-        name: "name",
-        type: "bytes",
-        indexed: false,
+        "name": "coinType",
+        "type": "uint256",
+        "internalType": "uint256"
       },
       {
-        internalType: "uint16",
-        name: "resource",
-        type: "uint16",
-        indexed: false,
-      },
-      {
-        internalType: "bytes",
-        name: "record",
-        type: "bytes",
-        indexed: false,
-      },
+        "name": "addr",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
     ],
-    type: "event",
-    name: "DNSRecordChanged",
-    anonymous: false,
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "setAddr",
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-        indexed: true,
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
       },
       {
-        internalType: "bytes",
-        name: "zonehash",
-        type: "bytes",
-        indexed: false,
-      },
+        "name": "addr",
+        "type": "address",
+        "internalType": "address"
+      }
     ],
-    type: "event",
-    name: "DNSZonehashChanged",
-    anonymous: false,
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "setContenthash",
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-        indexed: true,
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
       },
       {
-        internalType: "string",
-        name: "key",
-        type: "string",
-        indexed: true,
-      },
-      {
-        internalType: "bytes",
-        name: "value",
-        type: "bytes",
-        indexed: false,
-      },
+        "name": "hash",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
     ],
-    type: "event",
-    name: "DataChanged",
-    anonymous: false,
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "setData",
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-        indexed: true,
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
       },
       {
-        internalType: "string",
-        name: "key",
-        type: "string",
-        indexed: true,
+        "name": "key",
+        "type": "string",
+        "internalType": "string"
       },
       {
-        internalType: "string",
-        name: "value",
-        type: "string",
-        indexed: false,
-      },
+        "name": "value",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
     ],
-    type: "event",
-    name: "TextChanged",
-    anonymous: false,
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "setText",
+    "inputs": [
       {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
       },
-    ],
-    stateMutability: "view",
-    type: "function",
-    name: "addr",
-    outputs: [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
+        "name": "key",
+        "type": "string",
+        "internalType": "string"
       },
+      {
+        "name": "value",
+        "type": "string",
+        "internalType": "string"
+      }
     ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
-    inputs: [
+    "type": "function",
+    "name": "text",
+    "inputs": [
       {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
+        "name": "dnsEncoded",
+        "type": "bytes",
+        "internalType": "bytes"
       },
-    ],
-    stateMutability: "view",
-    type: "function",
-    name: "contenthash",
-    outputs: [
       {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
+        "name": "key",
+        "type": "string",
+        "internalType": "string"
+      }
     ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    inputs: [
+    "type": "event",
+    "name": "AddrChanged",
+    "inputs": [
       {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
+        "name": "node",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       },
       {
-        internalType: "string",
-        name: "key",
-        type: "string",
-      },
+        "name": "addr",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
-    name: "getData",
-    outputs: [
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-    ],
+    "anonymous": false
   },
   {
-    inputs: [
+    "type": "event",
+    "name": "AddressChanged",
+    "inputs": [
       {
-        internalType: "bytes[]",
-        name: "data",
-        type: "bytes[]",
+        "name": "node",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-    name: "multicall",
-    outputs: [
       {
-        internalType: "bytes[]",
-        name: "results",
-        type: "bytes[]",
+        "name": "cointype",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       },
+      {
+        "name": "addr",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
     ],
+    "anonymous": false
   },
   {
-    inputs: [],
-    stateMutability: "view",
-    type: "function",
-    name: "root",
-    outputs: [
+    "type": "event",
+    "name": "ContenthashChanged",
+    "inputs": [
       {
-        internalType: "contract IDomain",
-        name: "",
-        type: "address",
+        "name": "node",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       },
+      {
+        "name": "contenthash",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
     ],
+    "anonymous": false
   },
   {
-    inputs: [
+    "type": "event",
+    "name": "DataChanged",
+    "inputs": [
       {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
+        "name": "node",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       },
       {
-        internalType: "address",
-        name: "addr",
-        type: "address",
+        "name": "key",
+        "type": "string",
+        "indexed": true,
+        "internalType": "string"
       },
+      {
+        "name": "value",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
     ],
-    stateMutability: "nonpayable",
-    type: "function",
-    name: "setAddr",
+    "anonymous": false
   },
   {
-    inputs: [
+    "type": "event",
+    "name": "TextChanged",
+    "inputs": [
       {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
+        "name": "node",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       },
       {
-        internalType: "bytes",
-        name: "hash",
-        type: "bytes",
+        "name": "key",
+        "type": "string",
+        "indexed": true,
+        "internalType": "string"
       },
+      {
+        "name": "value",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      }
     ],
-    stateMutability: "nonpayable",
-    type: "function",
-    name: "setContenthash",
+    "anonymous": false
   },
   {
-    inputs: [
+    "type": "error",
+    "name": "AddressEmptyCode",
+    "inputs": [
       {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
-      },
-      {
-        internalType: "string",
-        name: "key",
-        type: "string",
-      },
-      {
-        internalType: "bytes",
-        name: "value",
-        type: "bytes",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-    name: "setData",
+        "name": "target",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
   },
   {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
-      },
-      {
-        internalType: "string",
-        name: "key",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "value",
-        type: "string",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-    name: "setText",
+    "type": "error",
+    "name": "FailedCall",
+    "inputs": []
   },
   {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "dnsEncoded",
-        type: "bytes",
-      },
-      {
-        internalType: "string",
-        name: "key",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    name: "text",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
+    "type": "error",
+    "name": "InvalidDomain",
+    "inputs": []
   },
+  {
+    "type": "error",
+    "name": "NotAuthorized",
+    "inputs": []
+  }
 ] as const;

@@ -12,20 +12,22 @@ export function Header() {
     <header className="w-full py-3 border-b border-gray-300 bg-white text-center">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6">
         {/* Left side: brand or logo */}
-        <div className="flex items-center space-x-2">
-          {/* Example logo placeholder */}
-          <div className="h-8 w-8 rounded-full bg-gray-200">
-            <Image
-              src="/icons/logo.svg"
-              alt="Opti.domains logo"
-              width="40"
-              height="40"
-            />
+        <Link href="/">
+          <div className="flex items-center space-x-2">
+            {/* Example logo placeholder */}
+            <div className="h-8 w-8 rounded-full bg-gray-200">
+              <Image
+                src="/icons/logo.svg"
+                alt="Opti.domains logo"
+                width="40"
+                height="40"
+              />
+            </div>
+            <h1 className="md:text-2xl font-bold text-gray-900 tracking-tight text-base">
+              Opti.Domains <span className="text-blue-600">ENS L2</span>
+            </h1>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-            Opti.Domains <span className="text-blue-600">ENS L2</span>
-          </h1>
-        </div>
+        </Link>
 
         {/* Right side: nav & hamburger toggle */}
         <div className="flex items-center space-x-2 md:space-x-6">

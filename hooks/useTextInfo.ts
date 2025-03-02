@@ -7,33 +7,27 @@ import { dnsEncode } from "@/lib/utils";
 import { useReadContract } from "wagmi";
 import { useState, useEffect } from "react";
 
-const initialRecords = [
-  { label: "Twitter", key: "com.twitter", value: "" },
-  { label: "Github", key: "com.github", value: "" },
-  { label: "Telegram", key: "org.telegram", value: "" },
-  { label: "Discord", key: "com.discord", value: "" },
-  { label: "Farcaster", key: "xyz.farcaster", value: "" },
+export const initialSocials = [
+  { label: "Twitter", key: "com.twitter", value: "https://" },
+  { label: "Github", key: "com.github", value: "https://" },
+  { label: "Telegram", key: "org.telegram", value: "https://" },
+  { label: "Discord", key: "com.discord", value: "https://" },
+  { label: "Farcaster", key: "xyz.farcaster", value: "https://" },
 ];
 
 export function useTextInfo(
-  activeTab: string,
   label: string,
   resolverAddress: `0x${string}`
 ) {
   // Local state to store final decoded text data
-  const [textDecoded, setTextDecoded] = useState(initialRecords);
+  const [textDecoded, setTextDecoded] = useState(initialSocials);
 
   // Build the array of calls for multicall
   const [callTexts, setCallTexts] = useState<`0x${string}`[]>([]);
 
   useEffect(() => {
-    if (activeTab !== "social") {
-      setCallTexts([]);
-      return;
-    }
-
     // For each record label, encode resolver's text(...) call
-    const calls = initialRecords.map((record) =>
+    const calls = initialSocials.map((record) =>
       encodeFunctionData({
         abi: resolverABI,
         functionName: "text",
@@ -41,7 +35,7 @@ export function useTextInfo(
       })
     );
     setCallTexts(calls);
-  }, [activeTab, label]);
+  }, [label]);
 
   // Perform the multicall on the array of "text(...)" calls
   const { data, isSuccess, refetch } = useReadContract({
@@ -56,7 +50,7 @@ export function useTextInfo(
   useEffect(() => {
     if (isSuccess && data) {
       const results = data as `0x${string}`[];
-      if (results.length === initialRecords.length) {
+      if (results.length === initialSocials.length) {
         const decoded = results.map((res, i) => {
           const value = decodeFunctionResult({
             abi: resolverABI,
@@ -65,12 +59,11 @@ export function useTextInfo(
           }) as string;
 
           return {
-            label: initialRecords[i].label,
-            key: initialRecords[i].key,
-            value,
+            label: initialSocials[i].label,
+            key: initialSocials[i].key,
+            value: value !== "" ? value : initialSocials[i].value,
           };
         });
-
         setTextDecoded(decoded);
       }
     }

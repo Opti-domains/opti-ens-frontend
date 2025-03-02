@@ -10,6 +10,12 @@ import {
   optimismSepolia,
 } from "wagmi/chains";
 
+export const ethChain =
+  process.env.NEXT_PUBLIC_TESTNET === "true" ? sepolia : mainnet;
+
+export const optimismChain =
+  process.env.NEXT_PUBLIC_TESTNET === "true" ? optimismSepolia : optimism;
+
 export const projectId =
   process.env.NEXT_PUBLIC_PROJECT_ID || "b56e18d47c72ab683b10814fe9495694";
 
@@ -26,7 +32,10 @@ export const localChain: Chain = {
 export const config = getDefaultConfig({
   appName: "Opti Domains",
   projectId,
-  chains:
-    process.env.NEXT_PUBLIC_TESTNET === "true" ? [optimismSepolia] : [optimism],
+  chains: [
+    // localChain,
+    process.env.NEXT_PUBLIC_TESTNET === "true" ? sepolia : mainnet,
+    process.env.NEXT_PUBLIC_TESTNET === "true" ? optimismSepolia : optimism,
+  ],
   ssr: true,
 });
