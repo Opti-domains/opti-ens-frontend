@@ -2,16 +2,20 @@
 
 import { ethChain, optimismChain } from "@/config";
 import { multicallABI } from "@/lib/abi/multical";
-import { resolverABI } from "@/lib/abi/resolver";
+import { l1ResolverABI } from "@/lib/abi/l1resolver";
 import { dnsEncode } from "@/lib/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   decodeFunctionResult,
   encodeFunctionData,
   hexToString,
   namehash,
+  createPublicClient,
+  http,
+  toHex,
 } from "viem";
 import { usePublicClient, useReadContract, useWriteContract } from "wagmi";
+import { resolverABI } from "@/lib/abi/resolver";
 
 // ENS Registry ABI for resolver function
 const ensRegistryABI = [
@@ -64,7 +68,19 @@ export function useMigrateRecords(domain: string) {
   const [addressRecords, setAddressRecords] = useState(initialAddresses);
   const [profileRecords, setProfileRecords] = useState(initialProfile);
 
-  const l1PublicClient = usePublicClient({ chainId: ethChain.id });
+  // Create a viem public client for L1 with CCIP-Read support
+  const l1PublicClient = useMemo(
+    () =>
+      createPublicClient({
+        chain: ethChain,
+        transport: http(),
+        batch: {
+          multicall: true,
+        },
+      }),
+    [ethChain.id]
+  );
+
   const l2PublicClient = usePublicClient({ chainId: optimismChain.id });
   const { writeContractAsync } = useWriteContract();
 
@@ -85,160 +101,143 @@ export function useMigrateRecords(domain: string) {
 
   // Fetch all records from L1 resolver
   const fetchRecords = useCallback(async () => {
-    if (!l1ResolverAddress) return;
+    if (!l1ResolverAddress || !l1PublicClient) return;
 
     setIsFetching(true);
     setError(null);
 
     try {
-      // Build calls for text records
-      const textCalls = initialSocials.map((record) =>
-        encodeFunctionData({
-          abi: resolverABI,
+      const nodeHash = namehash(domain);
+
+      // Fetch text records
+      const textPromises = initialSocials.map((record) =>
+        l1PublicClient.readContract({
+          address: l1ResolverAddress,
+          abi: l1ResolverABI,
           functionName: "text",
-          args: [dnsEncode(domain), record.key],
+          args: [nodeHash, record.key],
         })
       );
 
-      // Build calls for address records
-      const addressCalls = initialAddresses.map((record) =>
-        encodeFunctionData({
-          abi: resolverABI,
+      // Fetch address records
+      const addressPromises = initialAddresses.map((record) =>
+        l1PublicClient.readContract({
+          address: l1ResolverAddress,
+          abi: l1ResolverABI,
           functionName: "addr",
-          args: [dnsEncode(domain), BigInt(record.coinType)],
+          args: [nodeHash, BigInt(record.coinType)],
         })
       );
 
-      // Build calls for profile records
-      const profileCalls = [
-        encodeFunctionData({
-          abi: resolverABI,
-          functionName: "contenthash",
-          args: [dnsEncode(domain)],
-        }),
-        encodeFunctionData({
-          abi: resolverABI,
-          functionName: "text",
-          args: [dnsEncode(domain), "display"],
-        }),
-        encodeFunctionData({
-          abi: resolverABI,
-          functionName: "text",
-          args: [dnsEncode(domain), "description"],
-        }),
-        encodeFunctionData({
-          abi: resolverABI,
-          functionName: "text",
-          args: [dnsEncode(domain), "avatar"],
-        }),
-        encodeFunctionData({
-          abi: resolverABI,
-          functionName: "text",
-          args: [dnsEncode(domain), "email"],
-        }),
-      ];
-
-      // Combine all calls
-      const allCalls = [...textCalls, ...addressCalls, ...profileCalls];
-
-      // Execute multicall
-      const results = (await l1PublicClient?.readContract({
+      // Fetch profile records
+      const contentHashPromise = l1PublicClient.readContract({
         address: l1ResolverAddress,
-        abi: multicallABI,
-        functionName: "multicall",
-        args: [allCalls],
-      })) as `0x${string}`[];
+        abi: l1ResolverABI,
+        functionName: "contenthash",
+        args: [nodeHash],
+      });
 
-      if (results) {
-        // Process text records
-        const textResults = results.slice(0, textCalls.length);
-        const decodedTexts = textResults.map((res, i) => {
-          const value = decodeFunctionResult({
-            abi: resolverABI,
-            functionName: "text",
-            data: res,
-          }) as string;
+      const displayPromise = l1PublicClient.readContract({
+        address: l1ResolverAddress,
+        abi: l1ResolverABI,
+        functionName: "text",
+        args: [nodeHash, "display"],
+      });
 
-          return {
-            label: initialSocials[i].label,
-            key: initialSocials[i].key,
-            value: value || "",
-          };
-        });
-        setTextRecords(decodedTexts);
+      const descriptionPromise = l1PublicClient.readContract({
+        address: l1ResolverAddress,
+        abi: l1ResolverABI,
+        functionName: "text",
+        args: [nodeHash, "description"],
+      });
 
-        // Process address records
-        const addressResults = results.slice(
-          textCalls.length,
-          textCalls.length + addressCalls.length
-        );
-        const decodedAddresses = addressResults.map((res, i) => {
-          let address = decodeFunctionResult({
-            abi: resolverABI,
-            functionName: "addr",
-            args: [dnsEncode(domain), BigInt(initialAddresses[i].coinType)],
-            data: res,
-          }) as string;
+      const avatarPromise = l1PublicClient.readContract({
+        address: l1ResolverAddress,
+        abi: l1ResolverABI,
+        functionName: "text",
+        args: [nodeHash, "avatar"],
+      });
 
-          if (initialAddresses[i].coinType !== 60) {
-            address = hexToString(address as `0x${string}`);
-          }
+      const emailPromise = l1PublicClient.readContract({
+        address: l1ResolverAddress,
+        abi: l1ResolverABI,
+        functionName: "text",
+        args: [nodeHash, "email"],
+      });
 
-          return {
-            icon: initialAddresses[i].icon,
-            coinType: initialAddresses[i].coinType,
-            address: address || "",
-          };
-        });
-        setAddressRecords(decodedAddresses);
+      // Wait for all promises to resolve
+      const [
+        textResults,
+        addressResults,
+        contentHashResult,
+        displayResult,
+        descriptionResult,
+        avatarResult,
+        emailResult,
+      ] = await Promise.all([
+        Promise.all(textPromises),
+        Promise.all(addressPromises),
+        contentHashPromise,
+        displayPromise,
+        descriptionPromise,
+        avatarPromise,
+        emailPromise,
+      ]);
 
-        // Process profile records
-        const profileResults = results.slice(
-          textCalls.length + addressCalls.length
-        );
+      // console.log([
+      //   textResults,
+      //   addressResults,
+      //   contentHashResult,
+      //   displayResult,
+      //   descriptionResult,
+      //   avatarResult,
+      //   emailResult,
+      // ]);
 
-        if (profileResults.length >= 5) {
-          const hexContentHash = decodeFunctionResult({
-            abi: resolverABI,
-            functionName: "contenthash",
-            data: profileResults[0],
-          }) as `0x${string}`;
-          const contentHash = hexToString(hexContentHash);
+      // Process text records
+      const decodedTexts = textResults.map((result, i) => {
+        return {
+          label: initialSocials[i].label,
+          key: initialSocials[i].key,
+          value: (result as string) || "",
+        };
+      });
+      setTextRecords(decodedTexts);
 
-          const display = decodeFunctionResult({
-            abi: resolverABI,
-            functionName: "text",
-            data: profileResults[1],
-          }) as string;
+      // Process address records
+      const decodedAddresses = addressResults.map((result, i) => {
+        let address = result as string;
 
-          const description = decodeFunctionResult({
-            abi: resolverABI,
-            functionName: "text",
-            data: profileResults[2],
-          }) as string;
-
-          const avatar = decodeFunctionResult({
-            abi: resolverABI,
-            functionName: "text",
-            data: profileResults[3],
-          }) as string;
-
-          const email = decodeFunctionResult({
-            abi: resolverABI,
-            functionName: "text",
-            data: profileResults[4],
-          }) as string;
-
-          setProfileRecords({
-            contenthash: contentHash || "",
-            display: display || "",
-            description: description || "",
-            avatar: avatar || "",
-            email: email || "",
-          });
+        if (initialAddresses[i].coinType !== 60 && address) {
+          address = hexToString(address as `0x${string}`);
         }
-      }
+
+        return {
+          icon: initialAddresses[i].icon,
+          coinType: initialAddresses[i].coinType,
+          address: address || "",
+        };
+      });
+      setAddressRecords(decodedAddresses);
+
+      // Process profile records
+      const hexContentHash = contentHashResult as `0x${string}`;
+      const contentHash = hexContentHash ? hexToString(hexContentHash) : "";
+
+      const display = (displayResult as string) || "";
+      const description = (descriptionResult as string) || "";
+      const avatar = (avatarResult as string) || "";
+      const email = (emailResult as string) || "";
+
+      setProfileRecords({
+        contenthash: contentHash,
+        display,
+        description,
+        avatar,
+        email,
+      });
     } catch (err) {
+      console.log("Error fetching records", err);
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
     } finally {
@@ -248,15 +247,33 @@ export function useMigrateRecords(domain: string) {
 
   // Migrate records to L2
   const migrateRecords = useCallback(async () => {
-    if (!l1ResolverAddress) return;
+    if (!l1ResolverAddress || !l2PublicClient) return;
 
     setIsMigrating(true);
     setError(null);
 
     try {
-      const l2ResolverAddress = process.env
-        .NEXT_PUBLIC_L1_RESOLVER_ADDRESS as `0x${string}`;
-      const nodeHash = namehash(domain);
+      const l2ResolverAddress = (await l2PublicClient.readContract({
+        address: process.env.NEXT_PUBLIC_PARENT_DOMAIN_ADDRESS as `0x${string}`,
+        abi: [
+          {
+            type: "function",
+            name: "resolver",
+            inputs: [],
+            outputs: [
+              {
+                name: "",
+                type: "address",
+                internalType: "address",
+              },
+            ],
+            stateMutability: "view",
+          },
+        ],
+        functionName: "resolver",
+        args: [],
+      })) as `0x${string}`;
+      const nodeHash = dnsEncode(domain);
 
       // Build calls to set text records
       const textCalls = textRecords
@@ -279,7 +296,9 @@ export function useMigrateRecords(domain: string) {
             args: [
               nodeHash,
               BigInt(record.coinType),
-              record.address as `0x${string}`,
+              record.coinType === 60
+                ? (record.address as `0x${string}`)
+                : toHex(record.address),
             ],
           })
         );
@@ -356,6 +375,7 @@ export function useMigrateRecords(domain: string) {
 
       return null;
     } catch (err) {
+      console.log("Error migrating records", err);
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
       throw error;
@@ -377,7 +397,7 @@ export function useMigrateRecords(domain: string) {
     if (l1ResolverAddress) {
       fetchRecords();
     }
-  }, [l1ResolverAddress, fetchRecords]);
+  }, [l1ResolverAddress, domain, fetchRecords]);
 
   return {
     l1ResolverAddress,

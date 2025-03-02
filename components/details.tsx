@@ -42,10 +42,8 @@ export default function DomainDetails({ label }: { label: string }) {
     args: [],
   });
 
-  const { setL1Resolver, isResolverCorrect, isFetching, isMigrating } =
-    useMigrateDomain(label);
+  const { setL1Resolver, isResolverCorrect } = useMigrateDomain(label);
 
-  console.log(resolver);
   useEffect(() => {
     if (!isConnected) {
       route.push("/");

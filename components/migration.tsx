@@ -1,29 +1,9 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  BaseError,
-  useAccount,
-  useSwitchChain,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
-import { encodeFunctionData, toHex } from "viem";
-import { resolverABI } from "@/lib/abi/resolver";
-import { dnsEncode } from "@/lib/utils";
-import { toast } from "sonner";
-import Image from "next/image";
-import { useOtherInfo } from "@/hooks/useOtherInfo";
+import { useState } from "react";
+import { useAccount, useSwitchChain } from "wagmi";
 import { ethChain, optimismChain } from "@/config";
+import { useMigrateRecords } from "@/hooks/useMigrateRecords";
 
 type Props = {
   domain: string;
@@ -41,6 +21,20 @@ export default function Migration({
 
   const [isMigrated, setIsMigrated] = useState(false);
   const [isMigrationSkipped, setIsMigrationSkipped] = useState(false);
+  const {
+    textRecords,
+    addressRecords,
+    profileRecords,
+    migrateRecords,
+    isFetching: isFetchingRecords,
+  } = useMigrateRecords(domain);
+
+  console.log("Records for migration", {
+    isFetchingRecords,
+    textRecords,
+    addressRecords,
+    profileRecords,
+  });
 
   const switchToOptimism = async () => {
     await switchChain({ chainId: optimismChain.id });
@@ -72,7 +66,15 @@ export default function Migration({
                     Switch to Optimism
                   </Button>
                 ) : (
-                  <Button onClick={setL1Resolver} className="mt-2">
+                  <Button
+                    onClick={async () => {
+                      await migrateRecords();
+                      setIsMigrated(true);
+                    }}
+                    className="mt-2"
+                    disabled={isFetchingRecords}
+                    style={{ opacity: isFetchingRecords ? 0.5 : 1 }}
+                  >
                     Migrate Records
                   </Button>
                 )}

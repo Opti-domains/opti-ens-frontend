@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 
 import { DomainList } from "@/components/domain-list";
 import { toast } from "sonner";
@@ -11,9 +11,12 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCheckDomain } from "@/hooks/useCheckDomain";
+import { optimismChain } from "@/config";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
+  const { switchChain } = useSwitchChain();
   const { checkDomain } = useCheckDomain();
   const [ensDomains, setEnsDomains] = useState<
     {
@@ -92,9 +95,9 @@ export default function HomePage() {
       setLoading(false);
       toast.error("Failed to fetch ENS domains.");
     });
-  }, [isConnected, address]);
+  }, [isConnected, address, fetchData]);
 
-  if (!isConnected) {
+  if (!isConnected || chainId !== optimismChain.id) {
     return (
       <div className="relative flex md:h-[600px] w-full flex-col items-center justify-center overflow-hidden rounded-lg  bg-background">
         <section className="z-10 flex flex-col items-center justify-center px-4 py-16 text-center">
@@ -141,12 +144,21 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8">
-            <ConnectButton
-              showBalance={false}
-              accountStatus="avatar"
-              chainStatus="icon"
-              label="Connect"
-            />
+            {!isConnected ? (
+              <ConnectButton
+                showBalance={false}
+                accountStatus="avatar"
+                chainStatus="icon"
+                label="Connect"
+              />
+            ) : (
+              <Button
+                onClick={() => switchChain({ chainId: optimismChain.id })}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                Switch to Optimism
+              </Button>
+            )}
           </div>
         </section>
         <DotPattern
