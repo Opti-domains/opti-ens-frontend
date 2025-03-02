@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SubNames from "@/components/subNames";
 import { useAccount, useReadContract } from "wagmi";
 import { rootDomainAddress } from "@/components/domain-list";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Socials from "@/components/socials";
 import Addresses from "@/components/addresses";
@@ -33,6 +33,8 @@ export default function DomainDetails({ label }: { label: string }) {
   const route = useRouter();
   console.log(label);
 
+  const [isMigrationSkipped, setIsMigrationSkipped] = useState(false);
+
   const { data: resolver } = useReadContract({
     address: rootDomainAddress,
     abi: ROOT_DOMAIN_ABI,
@@ -50,11 +52,15 @@ export default function DomainDetails({ label }: { label: string }) {
     }
   }, [isConnected]);
 
-  if (!isResolverCorrect) {
+  if (!isResolverCorrect && !isMigrationSkipped) {
     return (
       <div className="flex flex-col items-center justify-center space-y-8">
         <div className="md:w-[700px]">
-          <Migration domain={label} setL1Resolver={setL1Resolver}></Migration>
+          <Migration
+            domain={label}
+            setL1Resolver={setL1Resolver}
+            skipMigration={() => setIsMigrationSkipped(true)}
+          ></Migration>
         </div>
       </div>
     );

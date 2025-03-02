@@ -28,11 +28,19 @@ import { ethChain, optimismChain } from "@/config";
 type Props = {
   domain: string;
   setL1Resolver: () => Promise<`0x${string}`>;
+  skipMigration: () => void;
 };
 
-export default function Migration({ domain, setL1Resolver }: Props) {
+export default function Migration({
+  domain,
+  setL1Resolver,
+  skipMigration,
+}: Props) {
   const { chainId } = useAccount();
   const { switchChain } = useSwitchChain();
+
+  const [isMigrated, setIsMigrated] = useState(false);
+  const [isMigrationSkipped, setIsMigrationSkipped] = useState(false);
 
   const switchToOptimism = async () => {
     await switchChain({ chainId: optimismChain.id });
@@ -56,23 +64,71 @@ export default function Migration({ domain, setL1Resolver }: Props) {
 
         <div className="text-gray-600 mt-4">
           <div>1. Migrate domain records to Optimism</div>
+          {!isMigrated ? (
+            <div>
+              <div>
+                {chainId !== optimismChain.id ? (
+                  <Button onClick={switchToOptimism} className="mt-2">
+                    Switch to Optimism
+                  </Button>
+                ) : (
+                  <Button onClick={setL1Resolver} className="mt-2">
+                    Migrate Records
+                  </Button>
+                )}
+              </div>
+              <div
+                className="text-red-500 mt-2 hover:cursor-pointer text-sm"
+                onClick={() => {
+                  setIsMigrated(true);
+                  setIsMigrationSkipped(true);
+                }}
+              >
+                Skip records migration
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`${
+                isMigrationSkipped ? "text-red-600" : "text-green-600"
+              } mt-1`}
+            >
+              {isMigrationSkipped ? "Migration skipped" : "Records migrated"}
+            </div>
+          )}
         </div>
 
         <hr className="mt-4" />
 
         <div className="text-gray-600 mt-4">
-          <div>2. Point domain to our Superchain resolver</div>
-          <div>
-            {chainId !== ethChain.id ? (
-              <Button onClick={switchToEth} className="mt-2">
-                Switch to Ethereum
-              </Button>
-            ) : (
-              <Button onClick={setL1Resolver} className="mt-2">
-                Set Resolver
-              </Button>
-            )}
-          </div>
+          <div>2. Point the domain to our Superchain resolver</div>
+          {isMigrated ? (
+            <div>
+              <div>
+                {chainId !== ethChain.id ? (
+                  <Button onClick={switchToEth} className="mt-2">
+                    Switch to Ethereum
+                  </Button>
+                ) : (
+                  <Button onClick={setL1Resolver} className="mt-2">
+                    Set Resolver
+                  </Button>
+                )}
+              </div>
+              <div
+                className="text-red-500 mt-2 hover:cursor-pointer text-sm"
+                onClick={() => {
+                  skipMigration();
+                }}
+              >
+                Skip resolver migration
+              </div>
+            </div>
+          ) : (
+            <div className="text-red-600 mt-1">
+              Please migrate the domain records first
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

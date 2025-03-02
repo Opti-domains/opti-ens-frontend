@@ -129,6 +129,8 @@ export function useMigrateDomain(domain: string) {
 
       await publicClient?.waitForTransactionReceipt({ hash });
 
+      refetch();
+
       return hash;
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
