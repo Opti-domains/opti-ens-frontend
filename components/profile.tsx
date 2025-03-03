@@ -165,7 +165,7 @@ export default function Profile({parentDomain, resolverAddress}: Props) {
             </div>
           </div>
           <div className="md:pl-10">
-            <Image src={"/default-avatar.svg"} alt="avatar" width={100} height={100}/>
+            <Image src={state.avatar? `/api/image/${encodeURIComponent(state.avatar)}`: "/default-avatar.svg"} alt="avatar" width={100} height={100}/>
           </div>
         </div>
         <div className="flex flex-col gap-4">
