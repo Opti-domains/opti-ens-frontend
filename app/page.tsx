@@ -58,6 +58,7 @@ export default function HomePage() {
           };
         }
       );
+      console.log("mapped", mapped);
       if (labels.length > 0) {
         const listDomain = await checkDomain({ domains: labels });
         if (!listDomain || listDomain.length === 0) {
@@ -171,16 +172,26 @@ export default function HomePage() {
   }
 
   return (
-    <main className="px-4 py-8">
+    <main className="px-4 py-8 grid place-items-center">
       {loading ? (
-        <div className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center space-y-4 md:w-[700px]">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-          <Skeleton className="h-6 w-3/4 bg-gray-200 rounded-md" />
+          <Skeleton className="h-6 w-full bg-gray-200 rounded-md" />
           <Skeleton className="h-6 w-1/2 bg-gray-200 rounded-md" />
         </div>
       ) : (
-        <div>
-          <DomainList domains={ensDomains} fetchData={fetchData} />
+        <div className="space-y-4 md:w-[700px]">
+          {!ensDomains || ensDomains.length === 0 ? (
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md md:w-[700px]">
+                <p className="font-bold">⚠️ ENS Domain Not Found</p>
+                <p>We couldn’t find your ENS domain at the moment. If you recently made changes, please check back later
+                  as updates may take some time to propagate.</p>
+                <p className="mt-2">🔍 <strong>Tip:</strong> Make sure you’re connected with the correct wallet that owns
+                  the domain.</p>
+              </div>
+            ) :
+            <DomainList domains={ensDomains} fetchData={fetchData}/>
+          }
         </div>
       )}
     </main>
