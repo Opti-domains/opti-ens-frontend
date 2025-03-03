@@ -13,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Filter, ArrowDownUp } from "lucide-react";
+import { ChevronDown, ArrowDownUp } from "lucide-react";
 import {Label} from "@/components/ui/label";
 import {useRouter} from "next/navigation";
 
@@ -26,9 +26,15 @@ export type DomainTableType = {
 
 export default function DomainTable({ domains }: { domains: DomainTableType[] }) {
   const [search, setSearch] = useState("");
+  const [sortAsc, setSortAsc] = useState(true);
   const router = useRouter();
 
-  const filteredDomains = domains.filter((d) =>
+  // Sort domains by name in ascending or descending order
+  const sortedDomains = [...domains].sort((a, b) =>
+    sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+  );
+
+  const filteredDomains = sortedDomains.filter((d) =>
     d.fullDomain.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -39,27 +45,23 @@ export default function DomainTable({ domains }: { domains: DomainTableType[] })
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
-              Creation date <ChevronDown className="h-4 w-4" />
+              Sort by Name <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Sort by Name</DropdownMenuItem>
-            <DropdownMenuItem>Sort by Expiration</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
         <div className="flex gap-2">
-          <Button variant="ghost">
-            <ArrowDownUp className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost">
-            <Filter className="h-4 w-4 text-blue-500" />
+          <Button variant="ghost" onClick={() => setSortAsc(!sortAsc)}>
+            <ArrowDownUp className={`h-4 w-4 ${sortAsc ? "rotate-180" : ""}`} />
           </Button>
           <Input
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="md:w-[400px] bg-white"
+            className="md:w-[450px] bg-white"
           />
         </div>
       </div>

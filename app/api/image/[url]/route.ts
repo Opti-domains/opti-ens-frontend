@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { url: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ url: string }> }) {
   try {
-    const imageUrl = decodeURIComponent(params.url); // Decode the image URL
+    const url = (await params).url;
+    const imageUrl = decodeURIComponent(url); // Decode the image URL
 
     // Fetch the image
     const res = await fetch(imageUrl);
