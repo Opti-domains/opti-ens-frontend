@@ -142,24 +142,24 @@ export default function Profile({parentDomain, resolverAddress}: Props) {
         <CardTitle>
           <span className="md:text-3xl font-bold text-gray-600">{parentDomain}</span>
         </CardTitle>
-        <CardDescription>
           {parent && parent.toLowerCase() != "eth" &&
-          <Popover>
-            <PopoverTrigger className="border border-white rounded-lg p-1 bg-white hover:bg-blue-50 hover:border-blue-100">
-              <span className="text-gray-500 font-bold">parent</span>
-              <span className="text-gray-400 font-bold italic ml-4">{parent}</span>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-1">
-              <Button
-                variant="ghost"
-                className="text-gray-500 font-bold"
-                onClick={() => router.push(`/${parent}`)} >
-                View Profile
-              </Button>
-            </PopoverContent>
-          </Popover>
+            <CardDescription>
+              <Popover>
+                <PopoverTrigger className="border border-white rounded-lg p-1 bg-white hover:bg-blue-50 hover:border-blue-100">
+                  <span className="text-gray-500 font-bold">parent</span>
+                  <span className="text-gray-400 font-bold italic ml-4">{parent}</span>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-1">
+                  <Button
+                    variant="ghost"
+                    className="text-gray-500 font-bold"
+                    onClick={() => router.push(`/${parent}`)} >
+                    View Profile
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            </CardDescription>
           }
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-1">
         <div className="flex w-full space-x-4 items-center">
