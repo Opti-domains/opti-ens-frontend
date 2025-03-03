@@ -95,7 +95,7 @@ export default function HomePage() {
       setLoading(false);
       toast.error("Failed to fetch ENS domains.");
     });
-  }, [isConnected, address, fetchData]);
+  }, [isConnected, address]);
 
   if (!isConnected || chainId !== optimismChain.id) {
     return (

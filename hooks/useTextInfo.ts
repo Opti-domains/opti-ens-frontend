@@ -8,11 +8,11 @@ import { useReadContract } from "wagmi";
 import { useState, useEffect } from "react";
 
 export const initialSocials = [
-  { label: "Twitter", key: "com.twitter", value: "https://" },
-  { label: "Github", key: "com.github", value: "https://" },
-  { label: "Telegram", key: "org.telegram", value: "https://" },
-  { label: "Discord", key: "com.discord", value: "https://" },
-  { label: "Farcaster", key: "xyz.farcaster", value: "https://" },
+  { label: "Twitter", key: "com.twitter", value: "" },
+  { label: "Github", key: "com.github", value: "" },
+  { label: "Telegram", key: "org.telegram", value: "" },
+  { label: "Discord", key: "com.discord", value: "" },
+  { label: "Farcaster", key: "xyz.farcaster", value: "" },
 ];
 
 export function useTextInfo(
