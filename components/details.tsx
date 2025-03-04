@@ -79,25 +79,25 @@ export default function DomainDetails({ label }: { label: string }) {
         <TabsList className="flex flex-row items-start justify-start mb-4 bg-white">
           <TabsTrigger
             value="account"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Profile
           </TabsTrigger>
           <TabsTrigger
             value="addresses"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Addresses
           </TabsTrigger>
           <TabsTrigger
             value="socials"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Socials
           </TabsTrigger>
           <TabsTrigger
             value="subnames"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Subnames
           </TabsTrigger>

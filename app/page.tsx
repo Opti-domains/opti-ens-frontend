@@ -182,12 +182,25 @@ export default function HomePage() {
       ) : (
         <div className="space-y-4 md:w-[700px]">
           {!ensDomains || ensDomains.length === 0 ? (
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md md:w-[700px]">
-                <p className="font-bold">⚠️ ENS Domain Not Found</p>
-                <p>We couldn’t find your ENS domain at the moment. If you recently made changes, please check back later
-                  as updates may take some time to propagate.</p>
-                <p className="mt-2">🔍 <strong>Tip:</strong> Make sure you’re connected with the correct wallet that owns
-                  the domain.</p>
+              <div className="bg-blue-100 border-l-4 border-blue-400 p-6 rounded-md shadow-sm md:w-[700px]">
+                <h2 className="text-xl font-bold text-gray-800">🌐 ENS Domain Not Found</h2>
+                <p className="text-gray-600 mt-2">
+                  We couldn’t find an ENS domain associated with your wallet. If you recently registered or updated a
+                  domain, please check back later as updates may take some time to propagate.
+                </p>
+                <p className="text-gray-600 mt-2">
+                  If you don’t have an ENS domain yet, you can register one easily on the official ENS dApp.
+                </p>
+                <div className="mt-4">
+                  <a
+                    href="https://app.ens.domains"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+                  >
+                    Register ENS Domain
+                  </a>
+                </div>
               </div>
             ) :
             <DomainList domains={ensDomains} fetchData={fetchData}/>

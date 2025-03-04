@@ -1,7 +1,6 @@
 "use client";
 
 import {Card, CardContent, CardDescription, CardFooter, CardHeader} from "@/components/ui/card";
-import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Copy, Loader2} from "lucide-react";
@@ -12,6 +11,7 @@ import {resolverABI} from "@/lib/abi/resolver";
 import {dnsEncode} from "@/lib/utils";
 import {toast} from "sonner";
 import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
+import Image from "next/image";
 
 type Props = {
   parentDomain: string
@@ -106,27 +106,28 @@ export default function Addresses({ parentDomain, resolverAddress }: Props) {
           <span className="text-base font-bold italic">Enter your address will be map with your ENS.</span>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-1">
+      <CardContent className="space-y-5">
         {state.records.map((record, index) => (
           <div key={index} className="flex flex-col mb-2 space-x-2">
-            <Label className="text-sm font-bold text-gray-500 mb-2">
-              {record.icon}
-            </Label>
             <div className="relative w-full">
+              <div className="absolute inset-y-0 left-2 flex items-center">
+                <Image src={record.icon} alt="btc" width={45} height={45} className="rounded-full"/>
+              </div>
+
               <Input
-                className="text-gray-500 bg-white hover:bg-blue-50"
+                className="pl-16 pr-16 text-gray-600 bg-white hover:bg-blue-50 py-4 md:text-xl font-bold w-full rounded-lg h-[60px]"
                 value={record.address}
                 disabled={!isEditing}
                 onChange={(e) => handleUpdateValue(index, e.target.value)}
               />
+
               <Button
-                className="absolute inset-y-0 right-0"
+                className="absolute inset-y-0 right-0 h-[60px] w-[60px] flex items-center justify-center"
                 variant="ghost"
                 onClick={() => handleCopy(record.address)}
               >
-                <Copy className="w-5 h-5 text-gray-500" />
+                <Copy className="w-6 h-6 text-gray-500"/>
               </Button>
-
             </div>
           </div>
         ))}
