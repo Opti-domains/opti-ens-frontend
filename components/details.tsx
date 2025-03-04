@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SubNames from "@/components/subNames";
-import { useAccount, useReadContract } from "wagmi";
+import {useAccount, useReadContract, useSwitchChain} from "wagmi";
 import { rootDomainAddress } from "@/components/domain-list";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import Addresses from "@/components/addresses";
 import Profile from "@/components/profile";
 import { useMigrateDomain } from "@/hooks/useMigrateDomain";
 import Migration from "./migration";
+import {optimismChain} from "@/config";
 
 const ROOT_DOMAIN_ABI = [
   {
@@ -29,7 +30,8 @@ const ROOT_DOMAIN_ABI = [
 ];
 
 export default function DomainDetails({ label }: { label: string }) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
+  const {switchChain} = useSwitchChain();
   const route = useRouter();
   console.log(label);
 
@@ -48,7 +50,12 @@ export default function DomainDetails({ label }: { label: string }) {
     if (!isConnected) {
       route.push("/");
     }
-  }, [isConnected]);
+    if (isConnected &&
+      (isResolverCorrect || isMigrationSkipped) &&
+      chainId !== optimismChain.id) {
+      switchChain({ chainId: optimismChain.id });
+    }
+  }, [isConnected, chainId, isMigrationSkipped]);
 
   if (!isResolverCorrect && !isMigrationSkipped) {
     return (
@@ -64,31 +71,33 @@ export default function DomainDetails({ label }: { label: string }) {
     );
   }
 
+
+
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
       <Tabs defaultValue="account" className="md:w-[700px]">
         <TabsList className="flex flex-row items-start justify-start mb-4 bg-white">
           <TabsTrigger
             value="account"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Profile
           </TabsTrigger>
           <TabsTrigger
             value="addresses"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Addresses
           </TabsTrigger>
           <TabsTrigger
             value="socials"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Socials
           </TabsTrigger>
           <TabsTrigger
             value="subnames"
-            className="px-4 py-2 text-gray-500 text-xl font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="px-4 py-2 text-gray-500 md:text-xl text-base font-bold data-[state=active]:text-blue-500 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Subnames
           </TabsTrigger>

@@ -1,8 +1,8 @@
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {Copy, Loader2} from "lucide-react";
+import {ChevronsUpDown, Copy, Loader2} from "lucide-react";
 import {useEffect, useState} from "react";
 import {BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
 import {encodeFunctionData, toHex} from "viem";
@@ -11,6 +11,9 @@ import {dnsEncode} from "@/lib/utils";
 import {toast} from "sonner";
 import Image from "next/image";
 import {useOtherInfo} from "@/hooks/useOtherInfo";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {useRouter} from "next/navigation";
+import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
 
 type Props = {
   parentDomain: string
@@ -19,6 +22,8 @@ type Props = {
 
 export default function Profile({parentDomain, resolverAddress}: Props) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const [storageType, setStorageType] = useState("IPFS");
   const [state, setState] = useState({
     contenthash: "",
     display: "",
@@ -26,6 +31,8 @@ export default function Profile({parentDomain, resolverAddress}: Props) {
     avatar: "",
     email: "",
   });
+  const router = useRouter();
+  const parent = parentDomain.split(".").slice(1).join(".");
 
   const {profileDecoded, refetchProfile} = useOtherInfo(parentDomain, resolverAddress);
   const {data: hash, error: writeErr, writeContract} = useWriteContract();
@@ -138,6 +145,24 @@ export default function Profile({parentDomain, resolverAddress}: Props) {
         <CardTitle>
           <span className="md:text-3xl font-bold text-gray-600">{parentDomain}</span>
         </CardTitle>
+          {parent && parent.toLowerCase() != "eth" &&
+            <CardDescription>
+              <Popover>
+                <PopoverTrigger className="border border-white rounded-lg p-1 bg-white hover:bg-blue-50 hover:border-blue-100">
+                  <span className="text-gray-500 font-bold">parent</span>
+                  <span className="text-gray-400 font-bold italic ml-4">{parent}</span>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-1">
+                  <Button
+                    variant="ghost"
+                    className="text-gray-500 font-bold"
+                    onClick={() => router.push(`/${parent}`)} >
+                    View Profile
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            </CardDescription>
+          }
       </CardHeader>
       <CardContent className="space-y-1">
         <div className="flex w-full space-x-4 items-center">
@@ -246,11 +271,55 @@ export default function Profile({parentDomain, resolverAddress}: Props) {
           </div>
           <div className="flex w-full space-x-4 items-center">
             <div className="flex flex-col w-full gap-3">
-              <Label className="font-bold text-gray-500">Content hash</Label>
+              <Collapsible
+                open={isOpen && isEditing}
+                onOpenChange={setIsOpen}
+                className="w-full space-y-2"
+              >
+                <div className="flex items-center justify-between space-x-4">
+                  <span className="font-bold text-gray-500">
+                    Website (on {storageType === "IPFS" ? "IPFS" : "ARWEAVE"})
+                  </span>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" disabled={!isEditing}>
+                      <ChevronsUpDown className="h-4 w-4" />
+                      <span className="sr-only">Toggle</span>
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+                <CollapsibleContent className="space-y-2 w-full">
+                  <div className="flex flex-row space-x-4 items-center justify-center">
+                    <div
+                      className={`flex flex-col items-center justify-center p-4 w-32 h-32 border rounded-md cursor-pointer ${storageType === "IPFS" ? "border-blue-500" : "border-gray-300"}`}
+                      onClick={() => {
+                        setStorageType("IPFS")
+                        setIsOpen(false);
+                      }}
+                    >
+                      <Image src="/icons/ipfs.svg" alt="ipfs" width={40} height={40}/>
+                      <span className="mt-2 text-sm font-bold">IPFS</span>
+                    </div>
+                    <div
+                      className={`flex flex-col items-center justify-center p-4 w-32 h-32 border rounded-md cursor-pointer ${storageType === "AR" ? "border-blue-500" : "border-gray-300"}`}
+                      onClick={() => {
+                        setStorageType("AR");
+                        setIsOpen(false);
+                      }}
+                    >
+                      <Image src="/icons/ar.svg" alt="ar" width={40} height={40}/>
+                      <span className="mt-2 text-sm font-bold">ARWEAVE</span>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
               <div className="relative w-full">
+                <div className="absolute inset-y-0 left-2 flex items-center">
+                  <Image src={storageType === "IPFS" ? "/icons/ipfs.svg" : "/icons/ar.svg"} alt="store" width={30} height={30}/>
+                </div>
                 <Input
-                  className="text-gray-500 bg-white hover:bg-blue-50"
+                  className="pl-12 text-gray-500 bg-white hover:bg-blue-50"
                   value={state.contenthash}
+                  placeholder={storageType === "IPFS" ? "ipfs://" : "ar://"}
                   onChange={(e) =>
                     setState((prev) => ({
                       ...prev,
