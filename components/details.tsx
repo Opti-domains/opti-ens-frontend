@@ -33,7 +33,7 @@ export default function DomainDetails({ label }: { label: string }) {
   const { address, isConnected, chainId } = useAccount();
   const {switchChain} = useSwitchChain();
   const route = useRouter();
-  console.log(label);
+  const isSubdomain = label.endsWith(".eth") && label.split(".").length > 2;
 
   const [isMigrationSkipped, setIsMigrationSkipped] = useState(false);
 
@@ -57,7 +57,7 @@ export default function DomainDetails({ label }: { label: string }) {
     }
   }, [isConnected, chainId, isMigrationSkipped]);
 
-  if (!isResolverCorrect && !isMigrationSkipped) {
+  if (!isResolverCorrect && !isMigrationSkipped && !isSubdomain) {
     return (
       <div className="flex flex-col items-center justify-center space-y-8">
         <div className="md:w-[700px]">
