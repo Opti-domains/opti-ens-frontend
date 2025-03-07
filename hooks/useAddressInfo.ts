@@ -8,9 +8,9 @@ import { useEffect, useState } from "react";
 import {multicallABI} from "@/lib/abi/multical";
 
 export const initialAddress = [
-  { icon: "ETH", coinType: 60, address: "" },
-  { icon: "BTC", coinType: 0, address: "" },
-  { icon: "SOL", coinType: 501, address: "" },
+  { icon: "/icons/eth.svg", coinType: 60, address: "" },
+  { icon: "/icons/btc.svg", coinType: 0, address: "" },
+  { icon: "/icons/sol.svg", coinType: 501, address: "" },
 ];
 
 export function useAddressInfo(label: string, resolverAddress: `0x${string}`) {

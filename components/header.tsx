@@ -51,25 +51,6 @@ export function Header() {
 
           {/* Desktop Nav (hidden on small screens) */}
           <nav className="hidden items-center space-x-6 md:flex">
-            {/* <Link
-              href="/"
-              className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
-            >
-              Home
-            </Link>
-            <Link
-              href="/about"
-              className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              className="text-sm font-bold text-gray-900 hover:text-blue-500 transition duration-300"
-            >
-              Contact
-            </Link> */}
-
             {/* RainbowKit Connect Button */}
             <ConnectButton
               showBalance={false}
@@ -84,28 +65,6 @@ export function Header() {
       {/* Mobile Nav (shown only when isOpen && on small screens) */}
       {isOpen && (
         <nav className="flex flex-col space-y-2 border-t p-4 md:hidden">
-          <Link
-            href="/"
-            className="text-sm font-medium text-gray-600"
-            onClick={() => setIsOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm font-medium text-gray-600"
-            onClick={() => setIsOpen(false)}
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="text-sm font-medium text-gray-600"
-            onClick={() => setIsOpen(false)}
-          >
-            Contact
-          </Link>
-
           {/* RainbowKit Connect Button */}
           <ConnectButton
             showBalance={false}
