@@ -1,11 +1,11 @@
 "use client";
 
-import {decodeFunctionResult, encodeFunctionData, toBytes} from "viem";
+import { decodeFunctionResult, encodeFunctionData, toBytes } from "viem";
 import { resolverABI } from "@/lib/abi/resolver";
 import { dnsEncode } from "@/lib/utils";
 import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
-import {multicallABI} from "@/lib/abi/multical";
+import { multicallABI } from "@/lib/abi/multical";
 import { getCoderByCoinName } from "@ensdomains/address-encoder";
 
 export const initialAddress = [
