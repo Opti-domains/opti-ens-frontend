@@ -1,17 +1,22 @@
 "use client";
 
-import {decodeFunctionResult, encodeFunctionData, hexToString} from "viem";
+import {decodeFunctionResult, encodeFunctionData, toBytes} from "viem";
 import { resolverABI } from "@/lib/abi/resolver";
 import { dnsEncode } from "@/lib/utils";
 import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import {multicallABI} from "@/lib/abi/multical";
+import { getCoderByCoinName } from "@ensdomains/address-encoder";
 
 export const initialAddress = [
   { icon: "/icons/eth.svg", coinType: 60, address: "" },
   { icon: "/icons/btc.svg", coinType: 0, address: "" },
   { icon: "/icons/sol.svg", coinType: 501, address: "" },
 ];
+
+const btcCoder = getCoderByCoinName("btc");
+const ethCoder = getCoderByCoinName("eth");
+const solCoder = getCoderByCoinName("sol");
 
 export function useAddressInfo(label: string, resolverAddress: `0x${string}`) {
   // Local state to store final decoded text data
@@ -53,8 +58,19 @@ export function useAddressInfo(label: string, resolverAddress: `0x${string}`) {
             data: res,
           }) as string;
 
-          if (initialAddress[i].coinType !== 60) {
-            address = hexToString(address as `0x${string}`);
+          if (address && address !== "0x") {
+            switch (initialAddress[i].coinType) {
+              case 0:
+                address = btcCoder.encode(toBytes(address));
+                break;
+              case 60:
+                address = ethCoder.encode(toBytes(address));
+                break;
+              case 501:
+                address = solCoder.encode(toBytes(address));
+            }
+          } else {
+            address = "";
           }
 
           return {

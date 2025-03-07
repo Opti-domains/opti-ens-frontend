@@ -1,11 +1,12 @@
 "use client";
 
-import { decodeFunctionResult, encodeFunctionData, hexToString } from "viem";
+import {decodeFunctionResult, encodeFunctionData} from "viem";
 import { resolverABI } from "@/lib/abi/resolver";
 import { dnsEncode } from "@/lib/utils";
 import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import { multicallABI } from "@/lib/abi/multical";
+import { decode } from "@ensdomains/content-hash";
 
 export function useOtherInfo(
   label: string,
@@ -67,7 +68,7 @@ export function useOtherInfo(
           functionName: "contenthash",
           data: results[0],
         }) as `0x${string}`;
-        const contentHash = hexToString(hexContentHash);
+        const contentHash = hexContentHash !== "0x" ? decode(hexContentHash) : "";
 
         const display = decodeFunctionResult({
           abi: resolverABI,
