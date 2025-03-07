@@ -12,10 +12,25 @@ import {dnsEncode} from "@/lib/utils";
 import {toast} from "sonner";
 import {type BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
 import Image from "next/image";
+import {getCoderByCoinName} from "@ensdomains/address-encoder";
 
 type Props = {
   parentDomain: string
   resolverAddress: `0x${string}`;
+}
+const btcCoder = getCoderByCoinName("btc");
+const ethCoder = getCoderByCoinName("eth");
+const solCoder = getCoderByCoinName("sol");
+
+function convertAddress(address: string, coinType: number) {
+  switch (coinType) {
+    case 0:
+      return btcCoder.decode(address);
+    case 501:
+      return solCoder.decode(address);
+    default:
+      return ethCoder.decode(address);
+  }
 }
 
 export default function Addresses({ parentDomain, resolverAddress }: Props) {
@@ -48,7 +63,7 @@ export default function Addresses({ parentDomain, resolverAddress }: Props) {
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setAddr",
-            args: [dnsEncode(parentDomain), BigInt(record.coinType), toHex(toBytes(record.address))],
+            args: [dnsEncode(parentDomain), BigInt(record.coinType), toHex(convertAddress(record.address, record.coinType))],
           })
         )
       );
