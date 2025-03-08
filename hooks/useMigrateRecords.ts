@@ -6,13 +6,10 @@ import { l1ResolverABI } from "@/lib/abi/l1resolver";
 import { dnsEncode } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  decodeFunctionResult,
   encodeFunctionData,
-  hexToString,
   namehash,
   createPublicClient,
   http,
-  toHex,
 } from "viem";
 import { usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { resolverABI } from "@/lib/abi/resolver";
@@ -206,11 +203,7 @@ export function useMigrateRecords(domain: string) {
 
       // Process address records
       const decodedAddresses = addressResults.map((result, i) => {
-        let address = result as string;
-
-        if (initialAddresses[i].coinType !== 60 && address) {
-          address = hexToString(address as `0x${string}`);
-        }
+        const address = result as string;
 
         return {
           icon: initialAddresses[i].icon,
@@ -221,16 +214,13 @@ export function useMigrateRecords(domain: string) {
       setAddressRecords(decodedAddresses);
 
       // Process profile records
-      const hexContentHash = contentHashResult as `0x${string}`;
-      const contentHash = hexContentHash ? hexToString(hexContentHash) : "";
-
       const display = (displayResult as string) || "";
       const description = (descriptionResult as string) || "";
       const avatar = (avatarResult as string) || "";
       const email = (emailResult as string) || "";
 
       setProfileRecords({
-        contenthash: contentHash,
+        contenthash: contentHashResult as `0x${string}`,
         display,
         description,
         avatar,
@@ -277,7 +267,7 @@ export function useMigrateRecords(domain: string) {
 
       // Build calls to set text records
       const textCalls = textRecords
-        .filter((record) => record.value && record.value !== "https://")
+        .filter((record) => record.value && record.value !== "")
         .map((record) =>
           encodeFunctionData({
             abi: resolverABI,
@@ -296,9 +286,7 @@ export function useMigrateRecords(domain: string) {
             args: [
               nodeHash,
               BigInt(record.coinType),
-              record.coinType === 60
-                ? (record.address as `0x${string}`)
-                : toHex(record.address),
+              record.address as `0x${string}`,
             ],
           })
         );

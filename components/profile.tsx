@@ -5,7 +5,7 @@ import {Button} from "@/components/ui/button";
 import {ChevronsUpDown, Copy, Loader2} from "lucide-react";
 import {useEffect, useState} from "react";
 import {BaseError, useWaitForTransactionReceipt, useWriteContract} from "wagmi";
-import {encodeFunctionData, toHex} from "viem";
+import {encodeFunctionData} from "viem";
 import {resolverABI} from "@/lib/abi/resolver";
 import {dnsEncode} from "@/lib/utils";
 import {toast} from "sonner";
@@ -14,10 +14,18 @@ import {useOtherInfo} from "@/hooks/useOtherInfo";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {useRouter} from "next/navigation";
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
+import {encode} from "@ensdomains/content-hash";
 
 type Props = {
   parentDomain: string
   resolverAddress: `0x${string}`;
+}
+
+function convertContentHash(type: string, hash: string) {
+  if (type === "IPFS") {
+    return `0x${encode("ipfs", hash)}` as `0x${string}`;
+  }
+  return `0x${encode("arweave", hash)}` as `0x${string}`;
 }
 
 export default function Profile({parentDomain, resolverAddress}: Props) {
@@ -52,7 +60,7 @@ export default function Profile({parentDomain, resolverAddress}: Props) {
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setContenthash",
-            args: [dnsEncode(parentDomain), toHex(state.contenthash)],
+            args: [dnsEncode(parentDomain), convertContentHash(storageType, state.contenthash)],
           })
         );
       }
