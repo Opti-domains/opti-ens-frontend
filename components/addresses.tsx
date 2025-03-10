@@ -6,7 +6,7 @@ import {Button} from "@/components/ui/button";
 import {Copy, Loader2} from "lucide-react";
 import {useCallback, useEffect, useState} from "react";
 import {initialAddress, useAddressInfo} from "@/hooks/useAddressInfo";
-import {encodeFunctionData, toBytes, toHex} from "viem";
+import {encodeFunctionData, toHex} from "viem";
 import {resolverABI} from "@/lib/abi/resolver";
 import {dnsEncode} from "@/lib/utils";
 import {toast} from "sonner";
