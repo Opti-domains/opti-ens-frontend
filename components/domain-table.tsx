@@ -86,7 +86,7 @@ export default function DomainTable({ domains }: { domains: DomainTableType[] })
                 </TableCell>
                 <TableCell className="text-right">
                   <Label
-                    className="border rounded-full border-white text-xs font-bold text-blue-600 bg-white p-2 hover:bg-red-500 hover:text-white"
+                    className="border rounded-full border-white text-xs font-bold p-2 bg-red-500 text-white hover:bg-primary/90"
                   >
                     {domain.action}
                   </Label>

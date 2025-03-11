@@ -6,7 +6,7 @@ import {Button} from "@/components/ui/button";
 import {Copy, Loader2} from "lucide-react";
 import {useCallback, useEffect, useState} from "react";
 import {initialAddress, useAddressInfo} from "@/hooks/useAddressInfo";
-import {encodeFunctionData, toBytes, toHex} from "viem";
+import {encodeFunctionData, toHex} from "viem";
 import {resolverABI} from "@/lib/abi/resolver";
 import {dnsEncode} from "@/lib/utils";
 import {toast} from "sonner";
@@ -56,10 +56,9 @@ export default function Addresses({ parentDomain, resolverAddress }: Props) {
     }else {
       // save changes
       console.log("state", state);
-      console.log("addr", toHex(toBytes(state.records[0].address)));
       const calls: `0x${string}`[] = [];
       calls.push(
-        ...state.records.map((record) =>
+        ...state.records.filter((record) => record.address !== "").map((record) =>
           encodeFunctionData({
             abi: resolverABI,
             functionName: "setAddr",
