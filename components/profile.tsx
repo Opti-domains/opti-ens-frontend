@@ -42,7 +42,8 @@ type Props = {
 
 function convertContentHash(type: string, hash: string) {
   if (type === "IPFS") {
-    return `0x${encode("ipfs", hash)}` as `0x${string}`;
+    const cid = hash.toLowerCase().replace("ipfs://", "")
+    return `0x${encode("ipfs", cid)}` as `0x${string}`;
   }
   return `0x${encode("arweave", hash)}` as `0x${string}`;
 }
@@ -394,7 +395,7 @@ export default function Profile({ parentDomain, resolverAddress }: Props) {
                 <Input
                   className="pl-12 text-gray-500 bg-white hover:bg-blue-50"
                   value={state.contenthash}
-                  placeholder={storageType === "IPFS" ? "ipfs://" : "ar://"}
+                  placeholder={storageType === "IPFS" ? "bafybe... (IPFS CID)" : "d7bf3a... (TxID)"}
                   onChange={(e) =>
                     setState((prev) => ({
                       ...prev,
