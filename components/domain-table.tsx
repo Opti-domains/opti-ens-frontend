@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -14,17 +9,21 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, ArrowDownUp } from "lucide-react";
-import {Label} from "@/components/ui/label";
-import {useRouter} from "next/navigation";
+import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 export type DomainTableType = {
   name: string;
   fullDomain: string;
   icon: string;
   action: string;
-}
+};
 
-export default function DomainTable({ domains }: { domains: DomainTableType[] }) {
+export default function DomainTable({
+  domains,
+}: {
+  domains: DomainTableType[];
+}) {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
   const router = useRouter();
@@ -77,17 +76,23 @@ export default function DomainTable({ domains }: { domains: DomainTableType[] })
             </TableRow>
           ) : (
             filteredDomains.map((domain) => (
-              <TableRow key={domain.fullDomain} className="hover:bg-white" onClick={() => router.push(`/${domain.fullDomain}`)}>
+              <TableRow
+                key={domain.fullDomain}
+                className="hover:bg-white"
+                onClick={() => router.push(`/${domain.fullDomain}`)}
+              >
                 <TableCell className="flex items-center gap-3">
                   {/* Avatar */}
                   <div className={`h-8 w-8 rounded-full ${domain.icon}`} />
-                  <span className="text-lg font-bold text-gray-600">{domain.name}</span>
-                  <span className="text-gray-400">.{domain.fullDomain.split(".").slice(1).join(".")}</span>
+                  <span className="text-lg font-bold text-gray-600">
+                    {domain.name}
+                  </span>
+                  <span className="text-gray-400">
+                    .{domain.fullDomain.split(".").slice(1).join(".")}
+                  </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Label
-                    className="border rounded-full border-white text-xs font-bold p-2 bg-red-500 text-white hover:bg-primary/90"
-                  >
+                  <Label className="border rounded-full border-white text-xs font-bold p-2 bg-red-500 text-white hover:bg-primary/90 hover:cursor-pointer">
                     {domain.action}
                   </Label>
                 </TableCell>
